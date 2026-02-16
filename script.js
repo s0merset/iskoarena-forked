@@ -545,6 +545,81 @@ function updateMediaGallery() {
 // Team & Player Management Functions
 // ============================================
 
+// Mapping of sports to common position names (covers all sport options in the UI)
+const positionsBySport = {
+    'Badminton': ['Singles', 'Doubles'],
+    'Basketball': ['Point Guard', 'Shooting Guard', 'Small Forward', 'Power Forward', 'Center'],
+    'Basketball Men': ['Point Guard', 'Shooting Guard', 'Small Forward', 'Power Forward', 'Center'],
+    'Basketball Women': ['Point Guard', 'Shooting Guard', 'Small Forward', 'Power Forward', 'Center'],
+    'Cheerdance': ['Base', 'Flyer', 'Backspot', 'Spotter'],
+    'Chess': ['Player'],
+    'Dancesports': ['Leader', 'Follower', 'Solo'],
+    'Esports - Block Blast!': ['Player'],
+    'Esports - Cosplay': ['Contestant'],
+    'Esports - Mobile Legends: Bang Bang': ['Carry', 'Support', 'Roamer', 'Jungler', 'Mid Laner', 'Offlaner'],
+    'Esports - DOTA 2': ['Carry', 'Support', 'Offlaner', 'Mid', 'Roamer'],
+    'Esports - Valorant': ['Duelist', 'Initiator', 'Controller', 'Sentinel'],
+    'Esports - Tetris': ['Player'],
+    'Frisbee': ['Handler', 'Cutter', 'Defender'],
+    'Pinoy Games': ['Participant'],
+    'Mr. and Ms. Fitness': ['Competitor'],
+    "Rubik's Cube": ['Competitor'],
+    'Soccer': ['Goalkeeper', 'Left Back', 'Right Back', 'Center Back', 'Left Midfielder', 'Center Midfielder', 'Right Midfielder', 'Left Wing', 'Right Wing', 'Striker'],
+    'Scrabble': ['Player'],
+    'Softball': ['Pitcher','Catcher','First Base','Second Base','Third Base','Shortstop','Left Field','Center Field','Right Field','Designated Hitter'],
+    'Table Tennis': ['Singles', 'Doubles'],
+    'Volleyball': ['Setter', 'Outside Hitter', 'Middle Blocker', 'Opposite Hitter', 'Libero'],
+    'Volleyball Men': ['Setter', 'Outside Hitter', 'Middle Blocker', 'Opposite Hitter', 'Libero'],
+    'Volleyball Women': ['Setter', 'Outside Hitter', 'Middle Blocker', 'Opposite Hitter', 'Libero'],
+    'Petanque': ['Player'],
+    'Sudoku': ['Participant']
+};
+
+function updatePlayerPositionOptions(teamId) {
+    const select = document.getElementById('playerPosition');
+
+    // Reset select
+    select.innerHTML = '<option value="">Select Position</option>';
+
+    if (!teamId) return;
+
+    const team = DataManager.get('teams').find(t => t.id === parseInt(teamId));
+    if (!team) return;
+
+    const sport = team.primarySport || '';
+
+    // Try exact sport key first, then try to match by starting word (e.g., 'Basketball Men' -> 'Basketball')
+    let positions = positionsBySport[sport];
+    if (!positions) {
+        const base = sport.split(' ')[0];
+        positions = positionsBySport[base] || null;
+    }
+
+    if (positions && positions.length > 0) {
+        positions.forEach(pos => {
+            const opt = document.createElement('option');
+            opt.value = pos;
+            opt.textContent = pos;
+            select.appendChild(opt);
+        });
+    } else {
+        // If we don't have a list for this sport, allow a generic option
+        const opt = document.createElement('option');
+        opt.value = 'Player';
+        opt.textContent = 'Player';
+        select.appendChild(opt);
+        const other = document.createElement('option');
+        other.value = 'Other';
+        other.textContent = 'Other';
+        select.appendChild(other);
+    }
+}
+
+function onPlayerTeamChange(e) {
+    const teamId = e.target.value ? parseInt(e.target.value) : null;
+    updatePlayerPositionOptions(teamId);
+}
+
 function addTeam(e) {
     e.preventDefault();
 
@@ -653,6 +728,9 @@ function updatePlayerTeamDropdown() {
     const options = '<option value="">Select Team</option>' +
         teams.map(team => `<option value="${team.id}">${team.name}</option>`).join('');
     select.innerHTML = options;
+    // Reset positions select whenever teams list updates
+    const posSelect = document.getElementById('playerPosition');
+    if (posSelect) posSelect.innerHTML = '<option value="">Select Position</option>';
 }
 
 function updatePlayersTable() {
@@ -985,6 +1063,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Team management
     document.getElementById('teamForm').addEventListener('submit', addTeam);
     document.getElementById('playerForm').addEventListener('submit', addPlayer);
+    document.getElementById('playerTeam').addEventListener('change', onPlayerTeamChange);
 
     // Notifications
     document.getElementById('notificationForm').addEventListener('submit', sendNotification);

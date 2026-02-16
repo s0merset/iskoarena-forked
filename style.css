@@ -1498,3 +1498,19 @@ body {
 .mb-medium {
     margin-bottom: 20px;
 }
+
+/* Ensure form controls inside the main dashboard/cards are readable
+   (white cards should have dark text; login area keeps white text) */
+#mainDashboard .card .form-group input,
+#mainDashboard .card .form-group select,
+#mainDashboard .card .form-group textarea {
+    background: #ffffff;
+    color: var(--neutral-dark);
+    border: 1px solid var(--border-color);
+}
+
+#mainDashboard .card .form-group input::placeholder,
+#mainDashboard .card .form-group textarea::placeholder {
+    color: rgba(0,0,0,0.45);
+}
+
