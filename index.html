@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IskoArena - Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>IskoArena</h1>
+                <p>University Intramurals Tracker</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <p class="login-hint">Demo: admin / admin123</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="mainDashboard" class="dashboard" style="display: none;">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>IskoArena</h2>
+                <button class="menu-toggle" id="menuToggle">☰</button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-page="dashboard">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="#" class="nav-link" data-page="matches">
+                    <span class="icon">🏆</span> Manage Matches
+                </a>
+                <a href="#" class="nav-link" data-page="results">
+                    <span class="icon">📝</span> Record Results
+                </a>
+                <a href="#" class="nav-link" data-page="media">
+                    <span class="icon">📸</span> Media Upload
+                </a>
+                <a href="#" class="nav-link" data-page="teams">
+                    <span class="icon">👥</span> Teams & Players
+                </a>
+                <a href="#" class="nav-link" data-page="notifications">
+                    <span class="icon">🔔</span> Notifications
+                </a>
+                <a href="#" class="nav-link" data-page="archives">
+                    <span class="icon">📂</span> Archives
+                </a>
+            </nav>
+            <button id="logoutBtn" class="btn-logout">
+                <span class="icon">🚪</span> Logout
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="user-info">
+                    <span id="adminName">Admin</span>
+                    <div class="avatar">👤</div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Page -->
+                <section id="dashboard" class="page active">
+                    <div class="dashboard-cards">
+                        <div class="card stat-card">
+                            <div class="card-icon">🏆</div>
+                            <div class="card-content">
+                                <h3>Total Matches</h3>
+                                <p class="stat-number" id="totalMatches">0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="card-icon">⚡</div>
+                            <div class="card-content">
+                                <h3>Ongoing Matches</h3>
+                                <p class="stat-number" id="ongoingMatches">0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="card-icon">👥</div>
+                            <div class="card-content">
+                                <h3>Total Teams</h3>
+                                <p class="stat-number" id="totalTeams">0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="card-icon">👤</div>
+                            <div class="card-content">
+                                <h3>Total Players</h3>
+                                <p class="stat-number" id="totalPlayers">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Matches -->
+                    <div class="card">
+                        <h2>Recent Matches</h2>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Sport</th>
+                                    <th>Team A</th>
+                                    <th>Team B</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentMatchesTable">
+                                <tr>
+                                    <td colspan="6" class="empty-state">No matches yet. Create your first match!</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Manage Matches Page -->
+                <section id="matches" class="page">
+                    <div class="page-header">
+                        <h2>Manage Matches</h2>
+                    </div>
+
+                    <!-- Add Match Form -->
+                    <div class="card">
+                        <h3>Add New Match</h3>
+                        <form id="matchForm" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sport">Sport *</label>
+                                    <select id="sport" required>
+                                        <option value="">Select Sport</option>
+                                        <option value="Badminton">Badminton</option>
+                                        <option value="Basketball Men">Basketball Men</option>
+                                        <option value="Basketball Women">Basketball Women</option>
+                                        <option value="Cheerdance">Cheerdance</option>
+                                        <option value="Chess">Chess</option>
+                                        <option value="Dancesports">Dancesports</option>
+                                        <option value="Esports - Block Blast!">Esports - Block Blast!</option>
+                                        <option value="Esports - Cosplay">Esports - Cosplay</option>
+                                        <option value="Esports - Mobile Legends: Bang Bang">Esports - Mobile Legends: Bang Bang</option>
+                                        <option value="Esports - DOTA 2">Esports - DOTA 2</option>
+                                        <option value="Esports - Valorant">Esports - Valorant</option>
+                                        <option value="Esports - Tetris">Esports - Tetris</option>
+                                        <option value="Frisbee">Frisbee</option>
+                                        <option value="Pinoy Games">Pinoy Games (Sack Race, Kadang-Kadang, Tug of War, Takyan, Sungka, Chinese Garter, Bato Lata, Patintero)</option>
+                                        <option value="Mr. and Ms. Fitness">Mr. and Ms. Fitness</option>
+                                        <option value="Rubik's Cube">Rubik's Cube</option>
+                                        <option value="Soccer">Soccer</option>
+                                        <option value="Scrabble">Scrabble</option>
+                                        <option value="Softball">Softball</option>
+                                        <option value="Table Tennis">Table Tennis</option>
+                                        <option value="Volleyball Men">Volleyball Men</option>
+                                        <option value="Volleyball Women">Volleyball Women</option>
+                                        <option value="Petanque">Petanque</option>
+                                        <option value="Sudoku">Sudoku</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="teamA">Team A *</label>
+                                    <select id="teamA" required>
+                                        <option value="">Select Team A</option>
+                                        <option value="COS Scions">🎯 COS Scions</option>
+                                        <option value="SOM Tycoons">💼 SOM Tycoons</option>
+                                        <option value="CSS Stallions">🐴 CSS Stallions</option>
+                                        <option value="CCAD Phoenix">🔥 CCAD Phoenix</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="teamB">Team B *</label>
+                                    <select id="teamB" required>
+                                        <option value="">Select Team B</option>
+                                        <option value="COS Scions">🎯 COS Scions</option>
+                                        <option value="SOM Tycoons">💼 SOM Tycoons</option>
+                                        <option value="CSS Stallions">🐴 CSS Stallions</option>
+                                        <option value="CCAD Phoenix">🔥 CCAD Phoenix</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="matchDate">Date *</label>
+                                    <input type="date" id="matchDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="matchTime">Time *</label>
+                                    <input type="time" id="matchTime" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="venue">Venue *</label>
+                                    <input type="text" id="venue" placeholder="Location" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Match</button>
+                        </form>
+                    </div>
+
+                    <!-- Matches Table -->
+                    <div class="card">
+                        <h3>All Matches</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Sport</th>
+                                    <th>Team A</th>
+                                    <th>Team B</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Venue</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matchesTable">
+                                <tr>
+                                    <td colspan="8" class="empty-state">No matches yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Record Results Page -->
+                <section id="results" class="page">
+                    <div class="page-header">
+                        <h2>Record Results</h2>
+                    </div>
+
+                    <div class="card">
+                        <h3>Select Match & Record Result</h3>
+                        <form id="resultForm" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="resultMatch">Select Match *</label>
+                                    <select id="resultMatch" required>
+                                        <option value="">Choose a match</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row" id="resultScoreRow" style="display: none;">
+                                <div class="form-group">
+                                    <label for="scoreTeamA">Team A Score *</label>
+                                    <input type="number" id="scoreTeamA" min="0" placeholder="0" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="scoreTeamB">Team B Score *</label>
+                                    <input type="number" id="scoreTeamB" min="0" placeholder="0" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success" style="display: none;" id="submitResultBtn">Save Result</button>
+                        </form>
+                    </div>
+
+                    <!-- Results History -->
+                    <div class="card">
+                        <h3>Results History</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Sport</th>
+                                    <th>Team A</th>
+                                    <th>Team A Score</th>
+                                    <th>Team B Score</th>
+                                    <th>Team B</th>
+                                    <th>Date</th>
+                                    <th>Winner</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTable">
+                                <tr>
+                                    <td colspan="7" class="empty-state">No results recorded yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Media Upload Page -->
+                <section id="media" class="page">
+                    <div class="page-header">
+                        <h2>Media Upload</h2>
+                    </div>
+
+                    <div class="card">
+                        <h3>Upload Media</h3>
+                        <form id="mediaForm" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="mediaFile">Select Image or Video *</label>
+                                    <input type="file" id="mediaFile" accept="image/*,video/*" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="mediaTitle">Title *</label>
+                                    <input type="text" id="mediaTitle" placeholder="Media title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="mediaMatch">Related Match</label>
+                                    <select id="mediaMatch">
+                                        <option value="">Select a match (optional)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="mediaPreview" class="media-preview" style="display: none;">
+                                <img id="previewImg" src="" alt="Preview" style="max-width: 200px; margin-top: 10px;">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Upload Media</button>
+                        </form>
+                    </div>
+
+                    <!-- Media Gallery -->
+                    <div class="card">
+                        <h3>Media Gallery</h3>
+                        <div class="media-gallery" id="mediaGallery">
+                            <p class="empty-state">No media uploaded yet.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Teams & Players Page -->
+                <section id="teams" class="page">
+                    <div class="page-header">
+                        <h2>Teams & Players</h2>
+                    </div>
+
+                    <!-- Add Team Form -->
+                    <div class="card">
+                        <h3>Add New Team</h3>
+                        <form id="teamForm" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="teamName">Team Name *</label>
+                                    <input type="text" id="teamName" placeholder="Team name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="primarySport">Primary Sport *</label>
+                                    <select id="primarySport" required>
+                                        <option value="">Select Sport</option>
+                                        <option value="Badminton">Badminton</option>
+                                        <option value="Basketball Men">Basketball Men</option>
+                                        <option value="Basketball Women">Basketball Women</option>
+                                        <option value="Cheerdance">Cheerdance</option>
+                                        <option value="Chess">Chess</option>
+                                        <option value="Dancesports">Dancesports</option>
+                                        <option value="Esports - Block Blast!">Esports - Block Blast!</option>
+                                        <option value="Esports - Cosplay">Esports - Cosplay</option>
+                                        <option value="Esports - Mobile Legends: Bang Bang">Esports - Mobile Legends: Bang Bang</option>
+                                        <option value="Esports - DOTA 2">Esports - DOTA 2</option>
+                                        <option value="Esports - Valorant">Esports - Valorant</option>
+                                        <option value="Esports - Tetris">Esports - Tetris</option>
+                                        <option value="Frisbee">Frisbee</option>
+                                        <option value="Pinoy Games">Pinoy Games (Sack Race, Kadang-Kadang, Tug of War, Takyan, Sungka, Chinese Garter, Bato Lata, Patintero)</option>
+                                        <option value="Mr. and Ms. Fitness">Mr. and Ms. Fitness</option>
+                                        <option value="Rubik's Cube">Rubik's Cube</option>
+                                        <option value="Soccer">Soccer</option>
+                                        <option value="Scrabble">Scrabble</option>
+                                        <option value="Softball">Softball</option>
+                                        <option value="Table Tennis">Table Tennis</option>
+                                        <option value="Volleyball Men">Volleyball Men</option>
+                                        <option value="Volleyball Women">Volleyball Women</option>
+                                        <option value="Petanque">Petanque</option>
+                                        <option value="Sudoku">Sudoku</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Team</button>
+                        </form>
+                    </div>
+
+                    <!-- Add Player Form -->
+                    <div class="card">
+                        <h3>Add New Player</h3>
+                        <form id="playerForm" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="playerName">Player Name *</label>
+                                    <input type="text" id="playerName" placeholder="Full name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="playerTeam">Team *</label>
+                                    <select id="playerTeam" required>
+                                        <option value="">Select Team</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="playerPosition">Position *</label>
+                                    <input type="text" id="playerPosition" placeholder="e.g., Forward, Setter" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Player</button>
+                        </form>
+                    </div>
+
+                    <!-- Teams Table -->
+                    <div class="card">
+                        <h3>All Teams</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Team Name</th>
+                                    <th>Primary Sport</th>
+                                    <th>Players</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teamsTable">
+                                <tr>
+                                    <td colspan="4" class="empty-state">No teams yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Players Table -->
+                    <div class="card">
+                        <h3>All Players</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Player Name</th>
+                                    <th>Team</th>
+                                    <th>Position</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="playersTable">
+                                <tr>
+                                    <td colspan="4" class="empty-state">No players yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Notifications Page -->
+                <section id="notifications" class="page">
+                    <div class="page-header">
+                        <h2>Notifications</h2>
+                    </div>
+
+                    <div class="card">
+                        <h3>Send Notification</h3>
+                        <form id="notificationForm" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="notificationType">Type *</label>
+                                    <select id="notificationType" required>
+                                        <option value="">Select Type</option>
+                                        <option value="General">General</option>
+                                        <option value="Sport">Sport</option>
+                                        <option value="Match">Match</option>
+                                        <option value="Result">Result</option>
+                                        <option value="Urgent">Urgent</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notificationSport">Sport (Optional)</label>
+                                    <select id="notificationSport">
+                                        <option value="">All Sports</option>
+                                        <option value="Badminton">Badminton</option>
+                                        <option value="Basketball Men">Basketball Men</option>
+                                        <option value="Basketball Women">Basketball Women</option>
+                                        <option value="Cheerdance">Cheerdance</option>
+                                        <option value="Chess">Chess</option>
+                                        <option value="Dancesports">Dancesports</option>
+                                        <option value="Esports - Block Blast!">Esports - Block Blast!</option>
+                                        <option value="Esports - Cosplay">Esports - Cosplay</option>
+                                        <option value="Esports - Mobile Legends: Bang Bang">Esports - Mobile Legends: Bang Bang</option>
+                                        <option value="Esports - DOTA 2">Esports - DOTA 2</option>
+                                        <option value="Esports - Valorant">Esports - Valorant</option>
+                                        <option value="Esports - Tetris">Esports - Tetris</option>
+                                        <option value="Frisbee">Frisbee</option>
+                                        <option value="Pinoy Games">Pinoy Games</option>
+                                        <option value="Mr. and Ms. Fitness">Mr. and Ms. Fitness</option>
+                                        <option value="Rubik's Cube">Rubik's Cube</option>
+                                        <option value="Soccer">Soccer</option>
+                                        <option value="Scrabble">Scrabble</option>
+                                        <option value="Softball">Softball</option>
+                                        <option value="Table Tennis">Table Tennis</option>
+                                        <option value="Volleyball Men">Volleyball Men</option>
+                                        <option value="Volleyball Women">Volleyball Women</option>
+                                        <option value="Petanque">Petanque</option>
+                                        <option value="Sudoku">Sudoku</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Archives Page -->
+                <section id="archives" class="page">
+                    <div class="page-header">
+                        <h2>Archives</h2>
+                    </div>
+
+                    <div class="card">
+                        <h3>Filter Archives</h3>
+                        <form id="archiveFilterForm" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="archiveYear">Year *</label>
+                                    <select id="archiveYear" required>
+                                        <option value="">Select Year</option>
+                                        <option value="2026">2026</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2024">2024</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="archiveSport">Sport (Optional)</label>
+                                    <select id="archiveSport">
+                                        <option value="">All Sports</option>
+                                        <option value="Basketball">Basketball</option>
+                                        <option value="Volleyball">Volleyball</option>
+                                        <option value="Football">Football</option>
+                                        <option value="Badminton">Badminton</option>
+                                        <option value="Tennis">Tennis</option>
+                                        <option value="Chess">Chess</option>
+                                        <option value="Esports">Esports</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Archived Matches -->
+                    <div class="card">
+                        <h3>Archived Matches</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Sport</th>
+                                    <th>Team A</th>
+                                    <th>Team B</th>
+                                    <th>Result</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="archivesTable">
+                                <tr>
+                                    <td colspan="5" class="empty-state">No archived matches. Archive matches by marking them as completed.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Archived Media -->
+                    <div class="card">
+                        <h3>Archived Media</h3>
+                        <div class="media-gallery" id="archiveMediaGallery">
+                            <p class="empty-state">No archived media yet.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Editing/Deleting -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 id="modalTitle">Confirm Action</h2>
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button id="modalConfirm" class="btn btn-danger">Confirm</button>
+                <button id="modalCancel" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
