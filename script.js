@@ -69,6 +69,7 @@ class DataManager {
                 matches: [],
                 teams: [],
                 players: [],
+                stats: [],
                 results: [],
                 media: [],
                 notifications: [],
@@ -153,6 +154,7 @@ class UIManager {
         const titleMap = {
             dashboard: 'Dashboard',
             matches: 'Manage Matches',
+            stats: 'Stats',
             results: 'Record Results',
             media: 'Media Upload',
             teams: 'Teams & Players',
@@ -545,6 +547,158 @@ function updateMediaGallery() {
 // Team & Player Management Functions
 // ============================================
 
+// Stats management
+let editingStatId = null;
+
+function onStatTypeChange() {
+    const type = document.getElementById('statType').value;
+    const playerGroup = document.getElementById('statPlayerGroup');
+    if (type === 'Player') {
+        playerGroup.style.display = 'block';
+    } else {
+        playerGroup.style.display = 'none';
+    }
+}
+
+function populateStatPlayerSelect() {
+    const playerSelect = document.getElementById('statPlayer');
+    if (!playerSelect) return;
+    const college = document.getElementById('statCollege').value;
+    const sport = document.getElementById('statSport').value;
+    const players = DataManager.get('players') || [];
+    const options = ['<option value="">Select Player</option>'] .concat(
+        players.filter(p => (!college || p.college === college) && (!sport || p.sport === sport)).map(p => `<option value="${p.id}">${p.name} (${p.jersey || ''})</option>`)
+    ).join('');
+    playerSelect.innerHTML = options;
+}
+
+function addStat(e) {
+    e.preventDefault();
+    const type = document.getElementById('statType').value;
+    const sport = document.getElementById('statSport').value;
+    const college = document.getElementById('statCollege').value;
+    const playerId = document.getElementById('statPlayer').value;
+    const statName = document.getElementById('statName').value;
+    const statValue = document.getElementById('statValue').value;
+
+    if (!type || !sport || !college || !statName || !statValue) {
+        UIManager.showError('Please fill in all required stat fields');
+        return;
+    }
+
+    const stat = {
+        type,
+        sport,
+        college,
+        playerId: type === 'Player' ? (playerId ? parseInt(playerId,10) : null) : null,
+        statName,
+        statValue
+    };
+
+    if (editingStatId) {
+        DataManager.update('stats', editingStatId, stat);
+        editingStatId = null;
+        document.getElementById('statsSubmitBtn').textContent = 'Add Stat';
+        UIManager.showSuccess('Stat updated');
+    } else {
+        DataManager.add('stats', stat);
+        UIManager.showSuccess('Stat added');
+    }
+
+    document.getElementById('statsForm').reset();
+    document.getElementById('statPlayerGroup').style.display = 'none';
+    updateStatsTable();
+}
+
+function loadDemoStats() {
+    const players = DataManager.get('players') || [];
+    const colleges = ['COS Scions','SOM Tycoons','CSS Stallions','CCAD Phoenix'];
+
+    // Add some player stats for first few players
+    players.slice(0,6).forEach((p, i) => {
+        const stat = {
+            type: 'Player',
+            sport: p.sport || 'Basketball Men',
+            college: p.college || p.teamName || colleges[i % colleges.length],
+            playerId: p.id,
+            statName: p.sport && p.sport.toLowerCase().includes('basket') ? 'Points' : 'Goals',
+            statValue: Math.floor(Math.random() * 20) + 1
+        };
+        DataManager.add('stats', stat);
+    });
+
+    // Add team-level sample stats
+    colleges.forEach(col => {
+        const stat = {
+            type: 'Team',
+            sport: 'Basketball Men',
+            college: col,
+            playerId: null,
+            statName: 'Wins',
+            statValue: Math.floor(Math.random() * 10)
+        };
+        DataManager.add('stats', stat);
+    });
+
+    updateStatsTable();
+    UIManager.showSuccess('Demo stats loaded');
+}
+
+function updateStatsTable() {
+    const stats = DataManager.get('stats') || [];
+    const tbody = document.getElementById('statsTable');
+    if (!tbody) return;
+    if (stats.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No stats yet.</td></tr>';
+        return;
+    }
+
+    const players = DataManager.get('players') || [];
+    tbody.innerHTML = stats.map(s => {
+        const player = s.playerId ? players.find(p => p.id === s.playerId) : null;
+        return `
+            <tr>
+                <td>${s.type}</td>
+                <td>${s.sport}</td>
+                <td>${s.college}</td>
+                <td>${player ? player.name : ''}</td>
+                <td>${s.statName}</td>
+                <td>${s.statValue}</td>
+                <td>${new Date(s.createdAt).toLocaleString()}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-small" onclick="editStat(${s.id})">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteStat(${s.id})">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function deleteStat(id) {
+    UIManager.showModal('Delete Stat', 'Are you sure you want to delete this stat?', () => {
+        DataManager.delete('stats', id);
+        updateStatsTable();
+        UIManager.showSuccess('Stat deleted');
+    });
+}
+
+function editStat(id) {
+    const stat = DataManager.get('stats').find(s => s.id === id);
+    if (!stat) return;
+    editingStatId = id;
+    document.getElementById('statType').value = stat.type;
+    document.getElementById('statSport').value = stat.sport;
+    document.getElementById('statCollege').value = stat.college;
+    document.getElementById('statName').value = stat.statName;
+    document.getElementById('statValue').value = stat.statValue;
+    document.getElementById('statsSubmitBtn').textContent = 'Update Stat';
+    onStatTypeChange();
+    populateStatPlayerSelect();
+    if (stat.playerId) document.getElementById('statPlayer').value = stat.playerId;
+}
+
 // Mapping of sports to common position names (covers all sport options in the UI)
 const positionsBySport = {
     'Badminton': ['Singles', 'Doubles'],
@@ -575,18 +729,13 @@ const positionsBySport = {
     'Sudoku': ['Participant']
 };
 
-function updatePlayerPositionOptions(teamId) {
+function updatePlayerPositionOptionsBySport(sport) {
     const select = document.getElementById('playerPosition');
+    if (!select) return;
 
     // Reset select
     select.innerHTML = '<option value="">Select Position</option>';
-
-    if (!teamId) return;
-
-    const team = DataManager.get('teams').find(t => t.id === parseInt(teamId));
-    if (!team) return;
-
-    const sport = team.primarySport || '';
+    if (!sport) return;
 
     // Try exact sport key first, then try to match by starting word (e.g., 'Basketball Men' -> 'Basketball')
     let positions = positionsBySport[sport];
@@ -603,7 +752,6 @@ function updatePlayerPositionOptions(teamId) {
             select.appendChild(opt);
         });
     } else {
-        // If we don't have a list for this sport, allow a generic option
         const opt = document.createElement('option');
         opt.value = 'Player';
         opt.textContent = 'Player';
@@ -615,9 +763,9 @@ function updatePlayerPositionOptions(teamId) {
     }
 }
 
-function onPlayerTeamChange(e) {
-    const teamId = e.target.value ? parseInt(e.target.value) : null;
-    updatePlayerPositionOptions(teamId);
+function onPlayerSportChange(e) {
+    const sport = e.target.value || '';
+    updatePlayerPositionOptionsBySport(sport);
 }
 
 function addTeam(e) {
@@ -637,7 +785,6 @@ function addTeam(e) {
     UIManager.showSuccess('Team added successfully!');
     document.getElementById('teamForm').reset();
     updateTeamsTable();
-    updatePlayerTeamDropdown();
     updateDashboardStats();
 }
 
@@ -649,7 +796,6 @@ function deleteTeam(teamId) {
             DataManager.delete('teams', teamId);
             UIManager.showSuccess('Team deleted successfully!');
             updateTeamsTable();
-            updatePlayerTeamDropdown();
             updateDashboardStats();
         }
     );
@@ -659,6 +805,7 @@ function updateTeamsTable() {
     const teams = DataManager.get('teams');
     const players = DataManager.get('players');
     const tbody = document.getElementById('teamsTable');
+    if (!tbody) return; // Teams panel removed, nothing to update
 
     if (teams.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No teams yet.</td></tr>';
@@ -684,29 +831,46 @@ function updateTeamsTable() {
 
 function addPlayer(e) {
     e.preventDefault();
+    const name = document.getElementById('playerName').value;
+    const college = document.getElementById('playerCollege').value;
+    const sport = document.getElementById('playerSport').value;
+    const position = document.getElementById('playerPosition').value;
+    const jersey = document.getElementById('playerJersey') ? document.getElementById('playerJersey').value : '';
+    const photoInput = document.getElementById('playerPhoto');
 
-    const player = {
-        name: document.getElementById('playerName').value,
-        teamId: parseInt(document.getElementById('playerTeam').value),
-        position: document.getElementById('playerPosition').value
-    };
-
-    if (!player.name || !player.teamId || !player.position) {
-        UIManager.showError('Please fill in all required fields');
+    if (!name || !college || !sport || !position || jersey === '') {
+        UIManager.showError('Please fill in all required fields (including jersey number)');
         return;
     }
 
-    // Get team name for display
-    const team = DataManager.get('teams').find(t => t.id === player.teamId);
-    if (team) {
-        player.teamName = team.name;
-    }
+    const finishAdd = (photoDataUrl) => {
+        const player = {
+            name,
+            college,
+            sport,
+            position,
+            jersey: jersey !== '' ? parseInt(jersey, 10) : null,
+            photo: photoDataUrl || null
+        };
 
-    DataManager.add('players', player);
-    UIManager.showSuccess('Player added successfully!');
-    document.getElementById('playerForm').reset();
-    updatePlayersTable();
-    updateDashboardStats();
+        DataManager.add('players', player);
+        UIManager.showSuccess('Player added successfully!');
+        document.getElementById('playerForm').reset();
+        // reset positions select
+        updatePlayersTable();
+        updateDashboardStats();
+    };
+
+    if (photoInput && photoInput.files && photoInput.files[0]) {
+        const file = photoInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            finishAdd(ev.target.result);
+        };
+        reader.readAsDataURL(file);
+    } else {
+        finishAdd(null);
+    }
 }
 
 function deletePlayer(playerId) {
@@ -723,30 +887,31 @@ function deletePlayer(playerId) {
 }
 
 function updatePlayerTeamDropdown() {
-    const teams = DataManager.get('teams');
-    const select = document.getElementById('playerTeam');
-    const options = '<option value="">Select Team</option>' +
-        teams.map(team => `<option value="${team.id}">${team.name}</option>`).join('');
-    select.innerHTML = options;
-    // Reset positions select whenever teams list updates
-    const posSelect = document.getElementById('playerPosition');
-    if (posSelect) posSelect.innerHTML = '<option value="">Select Position</option>';
+    // Deprecated: replaced by fixed college dropdown in UI
 }
 
 function updatePlayersTable() {
     const players = DataManager.get('players');
-    const tbody = document.getElementById('playersTable');
+    renderPlayers(players);
+}
 
-    if (players.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No players yet.</td></tr>';
+function renderPlayers(players) {
+    const tbody = document.getElementById('playersTable');
+    if (!tbody) return;
+
+    if (!players || players.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No players yet.</td></tr>';
         return;
     }
 
     tbody.innerHTML = players.map(player => {
+        const photoHtml = player.photo ? `<img src="${player.photo}" alt="${player.name}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:8px;vertical-align:middle;"> ` : '';
         return `
             <tr>
-                <td>${player.name}</td>
-                <td>${player.teamName || 'Unassigned'}</td>
+                <td>${photoHtml}${player.name}</td>
+                <td>${player.college || 'Unassigned'}</td>
+                <td>${player.sport || ''}</td>
+                <td>${player.jersey != null ? player.jersey : ''}</td>
                 <td>${player.position}</td>
                 <td>
                     <div class="action-buttons">
@@ -756,6 +921,32 @@ function updatePlayersTable() {
             </tr>
         `;
     }).join('');
+}
+
+function filterAndRenderPlayers() {
+    const q = (document.getElementById('playerSearch')?.value || '').toLowerCase().trim();
+    const college = document.getElementById('filterCollege')?.value || '';
+    const sport = document.getElementById('filterSport')?.value || '';
+
+    const all = DataManager.get('players') || [];
+    const filtered = all.filter(p => {
+        const matchesName = q === '' || (p.name || '').toLowerCase().includes(q);
+        const matchesCollege = college === '' || (p.college || '') === college;
+        const matchesSport = sport === '' || (p.sport || '') === sport;
+        return matchesName && matchesCollege && matchesSport;
+    });
+
+    renderPlayers(filtered);
+}
+
+function deleteAllPlayers() {
+    UIManager.showModal('Remove All Players', 'Are you sure you want to remove ALL players? This cannot be undone.', () => {
+        const data = DataManager.getData();
+        data.players = [];
+        DataManager.saveData(data);
+        updatePlayersTable();
+        updateDashboardStats();
+    });
 }
 
 // ============================================
@@ -915,7 +1106,8 @@ function handleLogin(e) {
         updateMatchesTable();
         updateResultMatchDropdown();
         updateMediaMatchDropdown();
-        updatePlayerTeamDropdown();
+        updatePlayersTable();
+        updateStatsTable();
         updateNotificationsList();
 
         UIManager.showSuccess(`Welcome back, ${admin.fullName}!`);
@@ -1060,10 +1252,34 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('mediaFile').addEventListener('change', onMediaFileChange);
     document.getElementById('mediaForm').addEventListener('submit', uploadMedia);
 
+    // Stats
+    const statsForm = document.getElementById('statsForm');
+    if (statsForm) statsForm.addEventListener('submit', addStat);
+    const statTypeEl = document.getElementById('statType');
+    if (statTypeEl) statTypeEl.addEventListener('change', onStatTypeChange);
+    const statCollegeEl = document.getElementById('statCollege');
+    if (statCollegeEl) statCollegeEl.addEventListener('change', populateStatPlayerSelect);
+    const statSportEl = document.getElementById('statSport');
+    if (statSportEl) statSportEl.addEventListener('change', populateStatPlayerSelect);
+    const loadDemoBtn = document.getElementById('loadDemoStatsBtn');
+    if (loadDemoBtn) loadDemoBtn.addEventListener('click', (e) => { e.preventDefault(); loadDemoStats(); });
+
     // Team management
-    document.getElementById('teamForm').addEventListener('submit', addTeam);
+    const teamFormEl = document.getElementById('teamForm');
+    if (teamFormEl) teamFormEl.addEventListener('submit', addTeam);
     document.getElementById('playerForm').addEventListener('submit', addPlayer);
-    document.getElementById('playerTeam').addEventListener('change', onPlayerTeamChange);
+    const playerSportEl = document.getElementById('playerSport');
+    if (playerSportEl) playerSportEl.addEventListener('change', onPlayerSportChange);
+
+    // Filters and search for players
+    const searchEl = document.getElementById('playerSearch');
+    if (searchEl) searchEl.addEventListener('input', filterAndRenderPlayers);
+    const filterCollegeEl = document.getElementById('filterCollege');
+    if (filterCollegeEl) filterCollegeEl.addEventListener('change', filterAndRenderPlayers);
+    const filterSportEl = document.getElementById('filterSport');
+    if (filterSportEl) filterSportEl.addEventListener('change', filterAndRenderPlayers);
+    const clearPlayersBtn = document.getElementById('clearPlayersBtn');
+    if (clearPlayersBtn) clearPlayersBtn.addEventListener('click', (e) => { e.preventDefault(); deleteAllPlayers(); });
 
     // Notifications
     document.getElementById('notificationForm').addEventListener('submit', sendNotification);

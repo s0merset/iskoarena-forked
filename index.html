@@ -147,6 +147,9 @@
                 <a href="#" class="nav-link" data-page="results">
                     <span class="icon">📝</span> Record Results
                 </a>
+                    <a href="#" class="nav-link" data-page="stats">
+                        <span class="icon">📈</span> Stats
+                    </a>
                 <a href="#" class="nav-link" data-page="media">
                     <span class="icon">📸</span> Media Upload
                 </a>
@@ -443,18 +446,28 @@
                         <h2>Teams & Players</h2>
                     </div>
 
-                    <!-- Add Team Form -->
+                    <!-- Add Player Form (college & sport selection) -->
                     <div class="card">
-                        <h3>Add New Team</h3>
-                        <form id="teamForm" class="form">
+                        <h3>Add New Player</h3>
+                        <form id="playerForm" class="form">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="teamName">Team Name *</label>
-                                    <input type="text" id="teamName" placeholder="Team name" required>
+                                    <label for="playerName">Player Name *</label>
+                                    <input type="text" id="playerName" placeholder="Full name" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="primarySport">Primary Sport *</label>
-                                    <select id="primarySport" required>
+                                    <label for="playerCollege">College *</label>
+                                    <select id="playerCollege" required>
+                                        <option value="">Select College</option>
+                                        <option value="COS Scions">COS Scions</option>
+                                        <option value="SOM Tycoons">SOM Tycoons</option>
+                                        <option value="CSS Stallions">CSS Stallions</option>
+                                        <option value="CCAD Phoenix">CCAD Phoenix</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="playerSport">Sport *</label>
+                                    <select id="playerSport" required>
                                         <option value="">Select Sport</option>
                                         <option value="Badminton">Badminton</option>
                                         <option value="Basketball Men">Basketball Men</option>
@@ -469,7 +482,7 @@
                                         <option value="Esports - Valorant">Esports - Valorant</option>
                                         <option value="Esports - Tetris">Esports - Tetris</option>
                                         <option value="Frisbee">Frisbee</option>
-                                        <option value="Pinoy Games">Pinoy Games (Sack Race, Kadang-Kadang, Tug of War, Takyan, Sungka, Chinese Garter, Bato Lata, Patintero)</option>
+                                        <option value="Pinoy Games">Pinoy Games</option>
                                         <option value="Mr. and Ms. Fitness">Mr. and Ms. Fitness</option>
                                         <option value="Rubik's Cube">Rubik's Cube</option>
                                         <option value="Soccer">Soccer</option>
@@ -483,71 +496,101 @@
                                     </select>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Add Team</button>
-                        </form>
-                    </div>
-
-                    <!-- Add Player Form -->
-                    <div class="card">
-                        <h3>Add New Player</h3>
-                        <form id="playerForm" class="form">
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label for="playerName">Player Name *</label>
-                                    <input type="text" id="playerName" placeholder="Full name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="playerTeam">Team *</label>
-                                    <select id="playerTeam" required>
-                                        <option value="">Select Team</option>
-                                    </select>
-                                </div>
                                 <div class="form-group">
                                     <label for="playerPosition">Position *</label>
                                     <select id="playerPosition" required>
                                         <option value="">Select Position</option>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label for="playerJersey">Jersey Number *</label>
+                                    <input type="number" id="playerJersey" min="0" placeholder="e.g., 7" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="playerPhoto">Player Photo (optional)</label>
+                                    <input type="file" id="playerPhoto" accept="image/*">
+                                </div>
                             </div>
                             <button type="submit" class="btn btn-primary">Add Player</button>
                         </form>
                     </div>
 
-                    <!-- Teams Table -->
+                    
+
+                    <!-- All Teams panel removed per request -->
+
+                    <!-- Players Search & Filter -->
                     <div class="card">
-                        <h3>All Teams</h3>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Team Name</th>
-                                    <th>Primary Sport</th>
-                                    <th>Players</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="teamsTable">
-                                <tr>
-                                    <td colspan="4" class="empty-state">No teams yet.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <h3>Search Players</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" id="playerSearch" placeholder="Search players by name...">
+                            </div>
+                            <div class="form-group">
+                                <label for="filterCollege">College</label>
+                                <select id="filterCollege">
+                                    <option value="">All Colleges</option>
+                                    <option value="COS Scions">COS Scions</option>
+                                    <option value="SOM Tycoons">SOM Tycoons</option>
+                                    <option value="CSS Stallions">CSS Stallions</option>
+                                    <option value="CCAD Phoenix">CCAD Phoenix</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filterSport">Sport</label>
+                                <select id="filterSport">
+                                    <option value="">All Sports</option>
+                                    <option value="Badminton">Badminton</option>
+                                    <option value="Basketball Men">Basketball Men</option>
+                                    <option value="Basketball Women">Basketball Women</option>
+                                    <option value="Cheerdance">Cheerdance</option>
+                                    <option value="Chess">Chess</option>
+                                    <option value="Dancesports">Dancesports</option>
+                                    <option value="Esports - Block Blast!">Esports - Block Blast!</option>
+                                    <option value="Esports - Cosplay">Esports - Cosplay</option>
+                                    <option value="Esports - Mobile Legends: Bang Bang">Esports - Mobile Legends: Bang Bang</option>
+                                    <option value="Esports - DOTA 2">Esports - DOTA 2</option>
+                                    <option value="Esports - Valorant">Esports - Valorant</option>
+                                    <option value="Esports - Tetris">Esports - Tetris</option>
+                                    <option value="Frisbee">Frisbee</option>
+                                    <option value="Pinoy Games">Pinoy Games</option>
+                                    <option value="Mr. and Ms. Fitness">Mr. and Ms. Fitness</option>
+                                    <option value="Rubik's Cube">Rubik's Cube</option>
+                                    <option value="Soccer">Soccer</option>
+                                    <option value="Scrabble">Scrabble</option>
+                                    <option value="Softball">Softball</option>
+                                    <option value="Table Tennis">Table Tennis</option>
+                                    <option value="Volleyball Men">Volleyball Men</option>
+                                    <option value="Volleyball Women">Volleyball Women</option>
+                                    <option value="Petanque">Petanque</option>
+                                    <option value="Sudoku">Sudoku</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button id="clearPlayersBtn" class="btn btn-danger">Remove All Players</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Players Table -->
                     <div class="card">
-                        <h3>All Players</h3>
+                        <h3>Teams & Players</h3>
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th>Player Name</th>
                                     <th>Team</th>
+                                    <th>Sport</th>
+                                    <th>Jersey</th>
                                     <th>Position</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="playersTable">
                                 <tr>
-                                    <td colspan="4" class="empty-state">No players yet.</td>
+                                    <td colspan="5" class="empty-state">No players yet.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -658,27 +701,7 @@
                                 </div>
                             </div>
                         </form>
-                    </div>
-
-                    <!-- Archived Matches -->
-                    <div class="card">
-                        <h3>Archived Matches</h3>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Sport</th>
-                                    <th>Team A</th>
-                                    <th>Team B</th>
-                                    <th>Result</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody id="archivesTable">
-                                <tr>
-                                    <td colspan="5" class="empty-state">No archived matches. Archive matches by marking them as completed.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        
                     </div>
 
                     <!-- Archived Media -->
@@ -687,6 +710,109 @@
                         <div class="media-gallery" id="archiveMediaGallery">
                             <p class="empty-state">No archived media yet.</p>
                         </div>
+                    </div>
+                    </section>
+
+                <!-- Stats Page -->
+                <section id="stats" class="page">
+                    <div class="page-header">
+                        <h2>Stats</h2>
+                    </div>
+
+                    <div class="card">
+                        <h3>Add / Edit Stat</h3>
+                        <form id="statsForm" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="statType">Type *</label>
+                                    <select id="statType" required>
+                                        <option value="">Select Type</option>
+                                        <option value="Player">Player</option>
+                                        <option value="Team">Team</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="statSport">Sport *</label>
+                                    <select id="statSport" required>
+                                        <option value="">Select Sport</option>
+                                        <option value="Badminton">Badminton</option>
+                                        <option value="Basketball Men">Basketball Men</option>
+                                        <option value="Basketball Women">Basketball Women</option>
+                                        <option value="Cheerdance">Cheerdance</option>
+                                        <option value="Chess">Chess</option>
+                                        <option value="Dancesports">Dancesports</option>
+                                        <option value="Esports - Mobile Legends: Bang Bang">Esports - Mobile Legends: Bang Bang</option>
+                                        <option value="Esports - DOTA 2">Esports - DOTA 2</option>
+                                        <option value="Esports - Valorant">Esports - Valorant</option>
+                                        <option value="Frisbee">Frisbee</option>
+                                        <option value="Soccer">Soccer</option>
+                                        <option value="Softball">Softball</option>
+                                        <option value="Table Tennis">Table Tennis</option>
+                                        <option value="Volleyball Men">Volleyball Men</option>
+                                        <option value="Volleyball Women">Volleyball Women</option>
+                                        <option value="Petanque">Petanque</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="statCollege">College / Team *</label>
+                                    <select id="statCollege" required>
+                                        <option value="">Select College</option>
+                                        <option value="COS Scions">COS Scions</option>
+                                        <option value="SOM Tycoons">SOM Tycoons</option>
+                                        <option value="CSS Stallions">CSS Stallions</option>
+                                        <option value="CCAD Phoenix">CCAD Phoenix</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" id="statPlayerGroup" style="display:none;">
+                                    <label for="statPlayer">Player *</label>
+                                    <select id="statPlayer">
+                                        <option value="">Select Player</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="statName">Stat Name *</label>
+                                    <input type="text" id="statName" required placeholder="e.g., Points, Assists, Goals">
+                                </div>
+                                <div class="form-group">
+                                    <label for="statValue">Value *</label>
+                                    <input type="text" id="statValue" required placeholder="e.g., 12">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <button type="submit" id="statsSubmitBtn" class="btn btn-primary">Add Stat</button>
+                                </div>
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button id="loadDemoStatsBtn" class="btn btn-secondary">Load Demo Stats</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3>All Stats</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Sport</th>
+                                    <th>Team</th>
+                                    <th>Player</th>
+                                    <th>Stat</th>
+                                    <th>Value</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statsTable">
+                                <tr><td colspan="8" class="empty-state">No stats yet.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
             </div>
