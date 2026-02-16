@@ -549,6 +549,21 @@ function updateMediaGallery() {
 
 // Stats management
 let editingStatId = null;
+// UI state for players and stats (sorting/pagination)
+const playersState = {
+    sortKey: 'name',
+    sortDir: 'asc',
+    page: 1,
+    perPage: 10
+};
+
+const statsState = {
+    sortKey: 'createdAt',
+    sortDir: 'desc'
+};
+
+// Temporary holder for dropped/resized player photo dataURL
+window._playerPhotoDataUrl = '';
 
 function onStatTypeChange() {
     const type = document.getElementById('statType').value;
@@ -648,13 +663,39 @@ function updateStatsTable() {
     const stats = DataManager.get('stats') || [];
     const tbody = document.getElementById('statsTable');
     if (!tbody) return;
-    if (stats.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No stats yet.</td></tr>';
+    const players = DataManager.get('players') || [];
+
+    // Apply filters from UI
+    const q = (document.getElementById('statsSearch')?.value || '').toLowerCase().trim();
+    const collegeFilter = document.getElementById('statsFilterCollege')?.value || '';
+    const sportFilter = document.getElementById('statsFilterSport')?.value || '';
+
+    let filtered = stats.filter(s => {
+        const player = s.playerId ? players.find(p => p.id === s.playerId) : null;
+        const matchesQ = q === '' || (s.statName || '').toLowerCase().includes(q) || (player && player.name.toLowerCase().includes(q)) || (s.college || '').toLowerCase().includes(q);
+        const matchesCollege = collegeFilter === '' || s.college === collegeFilter;
+        const matchesSport = sportFilter === '' || s.sport === sportFilter;
+        return matchesQ && matchesCollege && matchesSport;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No stats match the filters.</td></tr>';
         return;
     }
 
-    const players = DataManager.get('players') || [];
-    tbody.innerHTML = stats.map(s => {
+    // Sorting
+    filtered.sort((a, b) => {
+        const key = statsState.sortKey;
+        const dir = statsState.sortDir === 'asc' ? 1 : -1;
+        let va = a[key];
+        let vb = b[key];
+        if (va == null) va = '';
+        if (vb == null) vb = '';
+        if (key === 'createdAt') return (new Date(va) - new Date(vb)) * dir;
+        return String(va).localeCompare(String(vb)) * dir;
+    });
+
+    tbody.innerHTML = filtered.map(s => {
         const player = s.playerId ? players.find(p => p.id === s.playerId) : null;
         return `
             <tr>
@@ -837,9 +878,31 @@ function addPlayer(e) {
     const position = document.getElementById('playerPosition').value;
     const jersey = document.getElementById('playerJersey') ? document.getElementById('playerJersey').value : '';
     const photoInput = document.getElementById('playerPhoto');
+    // Clear any previous messages
+    const msgEl = document.getElementById('playerFormMessage');
+    if (msgEl) { msgEl.style.display = 'none'; msgEl.textContent = ''; }
 
-    if (!name || !college || !sport || !position || jersey === '') {
-        UIManager.showError('Please fill in all required fields (including jersey number)');
+    // Basic required validation
+    let hasError = false;
+    if (!name) { showFieldError(document.getElementById('playerName'), 'Name is required'); hasError = true; }
+    if (!college) { showFieldError(document.getElementById('playerCollege'), 'College is required'); hasError = true; }
+    if (!sport) { showFieldError(document.getElementById('playerSport'), 'Sport is required'); hasError = true; }
+    if (!position) { showFieldError(document.getElementById('playerPosition'), 'Position is required'); hasError = true; }
+    if (jersey === '') { showFieldError(document.getElementById('playerJersey'), 'Jersey number is required'); hasError = true; }
+    if (hasError) return;
+
+    // Unique jersey per college+sport enforcement
+    const jerseyNum = parseInt(jersey, 10);
+    if (isNaN(jerseyNum) || jerseyNum < 0) {
+        showFieldError(document.getElementById('playerJersey'), 'Enter a valid jersey number');
+        return;
+    }
+    const existing = DataManager.get('players') || [];
+    const duplicate = existing.find(p => p.college === college && p.sport === sport && p.jersey === jerseyNum);
+    if (duplicate) {
+        const msg = `Jersey ${jerseyNum} is already taken by ${duplicate.name} (${duplicate.college} - ${duplicate.sport})`;
+        const pm = document.getElementById('playerFormMessage');
+        if (pm) { pm.style.display = 'block'; pm.textContent = msg; }
         return;
     }
 
@@ -849,28 +912,73 @@ function addPlayer(e) {
             college,
             sport,
             position,
-            jersey: jersey !== '' ? parseInt(jersey, 10) : null,
+            jersey: jerseyNum,
             photo: photoDataUrl || null
         };
 
         DataManager.add('players', player);
         UIManager.showSuccess('Player added successfully!');
         document.getElementById('playerForm').reset();
-        // reset positions select
+        // clear preview
+        const preview = document.getElementById('playerPhotoPreview'); if (preview) preview.style.display = 'none';
+        const photoDataEl = document.getElementById('playerPhotoDataUrl'); if (photoDataEl) photoDataEl.value = '';
         updatePlayersTable();
         updateDashboardStats();
     };
 
+    // If a photo was added via drag/drop or preview, use the hidden data-url
+    const photoDataEl = document.getElementById('playerPhotoDataUrl');
+    if (photoDataEl && photoDataEl.value) {
+        finishAdd(photoDataEl.value);
+        return;
+    }
+
+    // If a photo file is provided, resize it for storage
     if (photoInput && photoInput.files && photoInput.files[0]) {
         const file = photoInput.files[0];
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            finishAdd(ev.target.result);
-        };
-        reader.readAsDataURL(file);
+        resizeImageFile(file, 600, (resizedDataUrl) => {
+            finishAdd(resizedDataUrl);
+        });
     } else {
         finishAdd(null);
     }
+}
+
+// Show inline field error
+function showFieldError(fieldEl, message) {
+    if (!fieldEl) return;
+    fieldEl.classList.add('input-error');
+    const pm = document.getElementById('playerFormMessage');
+    if (pm) { pm.style.display = 'block'; pm.textContent = message; }
+}
+
+function clearFieldError(fieldEl) {
+    if (!fieldEl) return;
+    fieldEl.classList.remove('input-error');
+    const pm = document.getElementById('playerFormMessage');
+    if (pm) { pm.style.display = 'none'; pm.textContent = ''; }
+}
+
+// Resize an image file using canvas then return DataURL via callback
+function resizeImageFile(file, maxWidth, callback) {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        img.onload = function() {
+            const ratio = img.width / img.height;
+            const width = Math.min(maxWidth, img.width);
+            const height = Math.round(width / ratio);
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            callback(dataUrl);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
 }
 
 function deletePlayer(playerId) {
@@ -898,13 +1006,31 @@ function updatePlayersTable() {
 function renderPlayers(players) {
     const tbody = document.getElementById('playersTable');
     if (!tbody) return;
-
     if (!players || players.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No players yet.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = players.map(player => {
+    // Apply sorting
+    const sorted = players.slice().sort((a, b) => {
+        const key = playersState.sortKey;
+        const dir = playersState.sortDir === 'asc' ? 1 : -1;
+        let va = a[key];
+        let vb = b[key];
+        if (va == null) va = '';
+        if (vb == null) vb = '';
+        if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir;
+        return String(va).localeCompare(String(vb)) * dir;
+    });
+
+    // Pagination
+    const perPage = playersState.perPage || 10;
+    const page = playersState.page || 1;
+    const total = sorted.length;
+    const start = (page - 1) * perPage;
+    const pageItems = sorted.slice(start, start + perPage);
+
+    tbody.innerHTML = pageItems.map(player => {
         const photoHtml = player.photo ? `<img src="${player.photo}" alt="${player.name}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:8px;vertical-align:middle;"> ` : '';
         return `
             <tr>
@@ -921,6 +1047,17 @@ function renderPlayers(players) {
             </tr>
         `;
     }).join('');
+
+    // Simple pagination controls below table
+    const existingPager = document.getElementById('playersPager');
+    if (existingPager) existingPager.remove();
+    const pager = document.createElement('div');
+    pager.id = 'playersPager';
+    pager.className = 'pager';
+    pager.style.marginTop = '8px';
+    const totalPages = Math.max(1, Math.ceil(total / perPage));
+    pager.innerHTML = `Page ${page} of ${totalPages}`;
+    tbody.parentElement.appendChild(pager);
 }
 
 function filterAndRenderPlayers() {
@@ -1271,6 +1408,102 @@ document.addEventListener('DOMContentLoaded', function() {
     const playerSportEl = document.getElementById('playerSport');
     if (playerSportEl) playerSportEl.addEventListener('change', onPlayerSportChange);
 
+    // Player photo preview, drag-drop and clear
+    const playerPhotoInput = document.getElementById('playerPhoto');
+    const playerPhotoDrop = document.getElementById('playerPhotoDrop');
+    const playerPhotoPreview = document.getElementById('playerPhotoPreview');
+    const playerPhotoImg = document.getElementById('playerPhotoImg');
+    const playerPhotoDataUrl = document.getElementById('playerPhotoDataUrl');
+    const clearPlayerPhotoBtn = document.getElementById('clearPlayerPhoto');
+    if (playerPhotoInput) playerPhotoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        resizeImageFile(file, 600, (dataUrl) => {
+            if (playerPhotoImg) playerPhotoImg.src = dataUrl;
+            if (playerPhotoPreview) playerPhotoPreview.style.display = 'block';
+            if (playerPhotoDataUrl) playerPhotoDataUrl.value = dataUrl;
+        });
+    });
+    if (playerPhotoDrop) {
+        playerPhotoDrop.addEventListener('dragover', (ev) => { ev.preventDefault(); playerPhotoDrop.classList.add('dragover'); });
+        playerPhotoDrop.addEventListener('dragleave', (ev) => { ev.preventDefault(); playerPhotoDrop.classList.remove('dragover'); });
+        playerPhotoDrop.addEventListener('drop', (ev) => {
+            ev.preventDefault(); playerPhotoDrop.classList.remove('dragover');
+            const file = ev.dataTransfer.files[0];
+            if (!file) return;
+            resizeImageFile(file, 600, (dataUrl) => {
+                if (playerPhotoImg) playerPhotoImg.src = dataUrl;
+                if (playerPhotoPreview) playerPhotoPreview.style.display = 'block';
+                if (playerPhotoDataUrl) playerPhotoDataUrl.value = dataUrl;
+            });
+        });
+    }
+    if (clearPlayerPhotoBtn) clearPlayerPhotoBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (playerPhotoImg) playerPhotoImg.src = '';
+        if (playerPhotoPreview) playerPhotoPreview.style.display = 'none';
+        if (playerPhotoDataUrl) playerPhotoDataUrl.value = '';
+        if (playerPhotoInput) playerPhotoInput.value = '';
+    });
+
+    // Clear validation errors on input
+    ['playerName','playerCollege','playerSport','playerPosition','playerJersey'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => clearFieldError(el));
+    });
+
+    // Players table: pagination selector
+    const playersPerPageSel = document.getElementById('playersPerPage');
+    if (playersPerPageSel) playersPerPageSel.addEventListener('change', (e) => {
+        playersState.perPage = parseInt(e.target.value,10) || 10;
+        playersState.page = 1;
+        filterAndRenderPlayers();
+    });
+
+    // Sortable columns for players
+    document.querySelectorAll('#teams table thead th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const key = th.getAttribute('data-sort');
+            if (playersState.sortKey === key) playersState.sortDir = playersState.sortDir === 'asc' ? 'desc' : 'asc';
+            else { playersState.sortKey = key; playersState.sortDir = 'asc'; }
+            // mark classes
+            document.querySelectorAll('#teams table thead th').forEach(h => h.classList.remove('sorted-asc','sorted-desc'));
+            th.classList.add(playersState.sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            filterAndRenderPlayers();
+        });
+    });
+
+    // Sortable columns for stats
+    document.querySelectorAll('#stats table thead th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const key = th.getAttribute('data-sort');
+            if (statsState.sortKey === key) statsState.sortDir = statsState.sortDir === 'asc' ? 'desc' : 'asc';
+            else { statsState.sortKey = key; statsState.sortDir = 'asc'; }
+            document.querySelectorAll('#stats table thead th').forEach(h => h.classList.remove('sorted-asc','sorted-desc'));
+            th.classList.add(statsState.sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            updateStatsTable();
+        });
+    });
+
+    // Stats filters and search
+    const statsSearchEl = document.getElementById('statsSearch');
+    if (statsSearchEl) statsSearchEl.addEventListener('input', updateStatsTable);
+    const statsFilterCollegeEl = document.getElementById('statsFilterCollege');
+    if (statsFilterCollegeEl) statsFilterCollegeEl.addEventListener('change', updateStatsTable);
+    const statsFilterSportEl = document.getElementById('statsFilterSport');
+    if (statsFilterSportEl) statsFilterSportEl.addEventListener('change', updateStatsTable);
+
+    // Export/Import CSV handlers
+    const exportPlayersBtn = document.getElementById('exportPlayersBtn');
+    if (exportPlayersBtn) exportPlayersBtn.addEventListener('click', (e) => { e.preventDefault(); exportPlayersCSV(); });
+    const importPlayersFile = document.getElementById('importPlayersFile');
+    if (importPlayersFile) importPlayersFile.addEventListener('change', (e) => { importPlayersCSV(e.target.files[0]); });
+
+    const exportStatsBtn = document.getElementById('exportStatsBtn');
+    if (exportStatsBtn) exportStatsBtn.addEventListener('click', (e) => { e.preventDefault(); exportStatsCSV(); });
+    const importStatsFile = document.getElementById('importStatsFile');
+    if (importStatsFile) importStatsFile.addEventListener('change', (e) => { importStatsCSV(e.target.files[0]); });
+
     // Filters and search for players
     const searchEl = document.getElementById('playerSearch');
     if (searchEl) searchEl.addEventListener('input', filterAndRenderPlayers);
@@ -1434,6 +1667,91 @@ function formatDate(dateString) {
 // Format time helper
 function formatTime(timeString) {
     return timeString.substring(0, 5); // Returns HH:MM format
+}
+
+// CSV helpers
+function csvEscape(val) {
+    if (val == null) return '';
+    const s = String(val);
+    if (s.includes(',') || s.includes('\n') || s.includes('"')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+}
+
+function exportPlayersCSV() {
+    const players = DataManager.get('players') || [];
+    const headers = ['id','name','college','sport','position','jersey','createdAt'];
+    const lines = [headers.join(',')].concat(players.map(p => headers.map(h => csvEscape(p[h])).join(',')));
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'players.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+function importPlayersCSV(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const rows = text.split(/\r?\n/).filter(Boolean);
+        const headers = rows.shift().split(',');
+        rows.forEach(r => {
+            const cols = r.split(',');
+            const obj = {};
+            headers.forEach((h,i) => { obj[h.trim()] = cols[i] ? cols[i].replace(/^"|"$/g,'') : ''; });
+            // basic mapping
+            const player = {
+                name: obj.name || obj.Name || '',
+                college: obj.college || obj.College || '',
+                sport: obj.sport || obj.Sport || '',
+                position: obj.position || obj.Position || '',
+                jersey: obj.jersey ? parseInt(obj.jersey,10) : null
+            };
+            if (player.name) DataManager.add('players', player);
+        });
+        updatePlayersTable();
+        updateDashboardStats();
+        UIManager.showSuccess('Players imported');
+    };
+    reader.readAsText(file);
+}
+
+function exportStatsCSV() {
+    const stats = DataManager.get('stats') || [];
+    const headers = ['id','type','sport','college','playerId','statName','statValue','createdAt'];
+    const lines = [headers.join(',')].concat(stats.map(p => headers.map(h => csvEscape(p[h])).join(',')));
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'stats.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+function importStatsCSV(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const rows = text.split(/\r?\n/).filter(Boolean);
+        const headers = rows.shift().split(',');
+        rows.forEach(r => {
+            const cols = r.split(',');
+            const obj = {};
+            headers.forEach((h,i) => { obj[h.trim()] = cols[i] ? cols[i].replace(/^"|"$/g,'') : ''; });
+            const stat = {
+                type: obj.type || 'Team',
+                sport: obj.sport || '',
+                college: obj.college || '',
+                playerId: obj.playerId ? parseInt(obj.playerId,10) : null,
+                statName: obj.statName || obj.Stat || '',
+                statValue: obj.statValue || obj.Value || ''
+            };
+            if (stat.statName) DataManager.add('stats', stat);
+        });
+        updateStatsTable();
+        UIManager.showSuccess('Stats imported');
+    };
+    reader.readAsText(file);
 }
 
 // Handle window resize for responsive behavior

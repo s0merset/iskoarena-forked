@@ -509,9 +509,18 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="playerPhoto">Player Photo (optional)</label>
-                                    <input type="file" id="playerPhoto" accept="image/*">
+                                    <div id="playerPhotoDrop" class="file-drop-area">
+                                        <input type="file" id="playerPhoto" accept="image/*">
+                                        <div class="file-drop-text">Drag & drop or click to select</div>
+                                    </div>
+                                    <div id="playerPhotoPreview" class="image-preview" style="display:none;margin-top:8px;">
+                                        <img id="playerPhotoImg" src="" alt="Preview" style="max-width:120px;border-radius:8px;">
+                                        <button id="clearPlayerPhoto" class="btn btn-secondary" style="margin-left:8px;">Remove</button>
+                                    </div>
                                 </div>
                             </div>
+                            <input type="hidden" id="playerPhotoDataUrl" value="">
+                            <div id="playerFormMessage" class="field-error-message" style="display:none;margin-bottom:8px;"></div>
                             <button type="submit" class="btn btn-primary">Add Player</button>
                         </form>
                     </div>
@@ -577,14 +586,28 @@
                     <!-- Players Table -->
                     <div class="card">
                         <h3>Teams & Players</h3>
+                        <div class="form-row" style="justify-content:space-between;align-items:center;margin-bottom:8px;">
+                            <div>
+                                <button id="exportPlayersBtn" class="btn btn-secondary">Export Players CSV</button>
+                                <input type="file" id="importPlayersFile" accept="text/csv" style="display:inline-block;margin-left:8px;">
+                            </div>
+                            <div>
+                                <label for="playersPerPage">Rows:</label>
+                                <select id="playersPerPage">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="25">25</option>
+                                </select>
+                            </div>
+                        </div>
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Player Name</th>
-                                    <th>Team</th>
-                                    <th>Sport</th>
-                                    <th>Jersey</th>
-                                    <th>Position</th>
+                                        <th data-sort="name">Player Name</th>
+                                        <th data-sort="college">Team</th>
+                                        <th data-sort="sport">Sport</th>
+                                        <th data-sort="jersey">Jersey</th>
+                                        <th data-sort="position">Position</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -796,17 +819,45 @@
 
                     <div class="card">
                         <h3>All Stats</h3>
+                        <div class="form-row" style="gap:12px;margin-bottom:8px;">
+                            <div class="form-group">
+                                <input type="text" id="statsSearch" placeholder="Search stats by name or player...">
+                            </div>
+                            <div class="form-group">
+                                <label for="statsFilterCollege">College</label>
+                                <select id="statsFilterCollege">
+                                    <option value="">All</option>
+                                    <option value="COS Scions">COS Scions</option>
+                                    <option value="SOM Tycoons">SOM Tycoons</option>
+                                    <option value="CSS Stallions">CSS Stallions</option>
+                                    <option value="CCAD Phoenix">CCAD Phoenix</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="statsFilterSport">Sport</label>
+                                <select id="statsFilterSport">
+                                    <option value="">All Sports</option>
+                                    <option value="Basketball Men">Basketball Men</option>
+                                    <option value="Volleyball Women">Volleyball Women</option>
+                                    <option value="Soccer">Soccer</option>
+                                </select>
+                            </div>
+                            <div style="margin-left:auto;">
+                                <button id="exportStatsBtn" class="btn btn-secondary">Export Stats CSV</button>
+                                <input type="file" id="importStatsFile" accept="text/csv" style="display:inline-block;margin-left:8px;">
+                            </div>
+                        </div>
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Type</th>
-                                    <th>Sport</th>
-                                    <th>Team</th>
-                                    <th>Player</th>
-                                    <th>Stat</th>
-                                    <th>Value</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
+                                        <th data-sort="type">Type</th>
+                                        <th data-sort="sport">Sport</th>
+                                        <th data-sort="college">Team</th>
+                                        <th data-sort="player">Player</th>
+                                        <th data-sort="statName">Stat</th>
+                                        <th data-sort="statValue">Value</th>
+                                        <th data-sort="createdAt">Date</th>
+                                        <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="statsTable">
