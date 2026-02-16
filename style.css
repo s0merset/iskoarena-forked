@@ -43,6 +43,8 @@
 html {
     font-size: 16px;
     scroll-behavior: smooth;
+    margin: 0;
+    padding: 0;
 }
 
 body {
@@ -51,50 +53,413 @@ body {
     color: var(--neutral-dark);
     line-height: 1.6;
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 /* ============================================
    LOGIN PAGE
    ============================================ */
 
+/* LOGIN PAGE STYLES */
 .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--primary-maroon) 0%, var(--primary-gold) 100%);
+    background: linear-gradient(135deg, rgba(169,29,58,0.95) 0%, rgba(139,21,40,0.95) 60%);
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #fff;
 }
 
-.login-box {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: var(--shadow-lg);
-    width: 100%;
-    max-width: 400px;
+/* Ensure login page uses full viewport width so no left strip shows */
+#loginPage, .login-container {
+    width: 100vw;
+    overflow-x: hidden;
 }
 
-.login-header {
-    text-align: center;
-    margin-bottom: 30px;
+/* Hide sidebar when main dashboard is not visible (inline style check)
+   This prevents the maroon sidebar strip from showing on the login/landing page */
+.dashboard[style*="display: none"] .sidebar,
+#mainDashboard[style*="display: none"] .sidebar {
+    display: none !important;
 }
 
-.login-header h1 {
+/* TOP NAVIGATION BAR */
+.login-nav {
+    background: linear-gradient(90deg, var(--secondary-maroon), var(--primary-maroon));
+    backdrop-filter: blur(8px);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(255,215,0,0.12);
+    box-shadow: 0 6px 30px rgba(0,0,0,0.35);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    margin: 0;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.nav-brand:hover {
+    transform: scale(1.05);
+}
+
+.nav-logo {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.nav-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-gold);
+    letter-spacing: 1px;
+}
+
+.nav-auth-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-btn {
+    padding: 0.6rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.nav-login-btn {
+    background: transparent;
+    color: var(--primary-gold);
+    border: 2px solid var(--primary-gold);
+}
+
+.nav-login-btn:hover {
+    background: var(--primary-gold);
     color: var(--primary-maroon);
-    font-size: 32px;
-    margin-bottom: 8px;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
 }
 
-.login-header p {
-    color: var(--neutral-gray);
-    font-size: 14px;
+.nav-signup-btn {
+    background: var(--primary-gold);
+    color: var(--primary-maroon);
+}
+
+.nav-signup-btn:hover {
+    background: #ffed4e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+}
+
+/* MAIN CONTENT LAYOUT */
+.login-main-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    padding: 3rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    margin-top: 80px;
+}
+
+/* NEWS SECTION */
+.login-news-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.login-news-section h2 {
+    font-size: 2rem;
+    color: var(--primary-gold);
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+.news-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.news-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    background: rgba(169,29,58,0.06);
+    border-color: var(--primary-gold);
+    box-shadow: 0 18px 40px rgba(169, 29, 58, 0.35);
+}
+
+.news-image {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(169,29,58,0.35), rgba(255,215,0,0.06));
+}
+
+.news-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.news-card:hover .news-image img {
+    transform: scale(1.05);
+}
+
+.news-content {
+    padding: 1.5rem;
+}
+
+.news-date {
+    font-size: 0.85rem;
+    color: var(--primary-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.news-content h3 {
+    font-size: 1.3rem;
+    color: #ffffff;
+    margin: 0.8rem 0;
+    font-weight: 700;
+}
+
+.news-content p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.news-link {
+    color: var(--primary-gold);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.news-link:hover {
+    color: #ffed4e;
+    transform: translateX(3px);
+}
+
+/* AUTH SECTION */
+.login-auth-section {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 0.5rem;
+}
+
+.auth-form {
+    display: none;
+    width: 100%;
+    max-width: 450px;
+    animation: slideIn 0.4s ease;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-card {
+    background: rgba(0,0,0,0.18);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 215, 0, 0.18);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.auth-header h1 {
+    font-size: 1.8rem;
+    color: #ffffff;
+    margin: 0.5rem 0;
+    font-weight: 700;
+}
+
+.auth-header p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+}
+
+/* FORM STYLES */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+    box-sizing: border-box;
+}
+
+.form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.form-group input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+.btn {
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-gold) 0%, #ffed4e 100%);
+    color: var(--primary-maroon);
+    padding: 0.9rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 0.5rem;
 }
 
 .login-hint {
     text-align: center;
-    font-size: 12px;
-    color: var(--neutral-gray);
-    margin-top: 16px;
+    color: rgba(255, 215, 0, 0.8);
+    font-size: 0.85rem;
+    margin-top: 1rem;
+    font-weight: 500;
+}
+
+.auth-toggle {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 1.5rem;
+}
+
+.auth-toggle a {
+    color: var(--primary-gold);
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+
+.auth-toggle a:hover {
+    color: #ffed4e;
+    text-decoration: underline;
+}
+
+.signup-message {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.signup-message.success {
+    color: #4caf50;
+}
+
+.signup-message.error {
+    color: #ff6b6b;
+}
+
+.signup-message.success {
+    background-color: var(--light-green);
+    color: var(--success-color);
+}
+
+.signup-message.error {
+    background-color: #fee2e2;
+    color: var(--danger-color);
 }
 
 /* ============================================
@@ -124,19 +489,35 @@ body {
 
 .sidebar-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    gap: 12px;
+}
+
+.sidebar-logo {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--primary-gold);
 }
 
 .sidebar-header h2 {
     font-size: 20px;
     font-weight: 600;
+    margin: 0;
 }
 
 .menu-toggle {
     display: none;
     background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: auto;
+}
     border: none;
     color: white;
     font-size: 24px;
@@ -732,6 +1113,30 @@ body {
    ============================================ */
 
 @media (max-width: 1024px) {
+    .login-main-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 2rem 1rem;
+    }
+
+    .login-news-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .news-card {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+    }
+
+    .news-image {
+        height: 150px;
+        min-width: 200px;
+    }
+
+    .news-content {
+        padding: 1rem;
+    }
+
     .dashboard-cards {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -750,6 +1155,58 @@ body {
 }
 
 @media (max-width: 768px) {
+    .login-nav {
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .nav-brand {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nav-auth-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nav-title {
+        font-size: 1.2rem;
+    }
+
+    .nav-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .login-main-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1.5rem 1rem;
+    }
+
+    .news-card {
+        grid-template-columns: 1fr;
+    }
+
+    .news-image {
+        height: 200px;
+        min-width: auto;
+    }
+
+    .login-news-section h2 {
+        font-size: 1.3rem;
+    }
+
+    .auth-card {
+        padding: 1.5rem;
+    }
+
+    .auth-header h1 {
+        font-size: 1.5rem;
+    }
+
     .dashboard {
         flex-direction: column;
     }
@@ -856,9 +1313,82 @@ body {
         font-size: 14px;
     }
 
-    .login-box {
-        padding: 25px;
-        margin: 20px;
+    .login-container {
+        min-height: auto;
+    }
+
+    .login-nav {
+        padding: 0.8rem;
+    }
+
+    .nav-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .nav-title {
+        font-size: 1rem;
+    }
+
+    .nav-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+    }
+
+    .login-main-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .login-news-section {
+        order: 2;
+    }
+
+    .login-auth-section {
+        order: 1;
+    }
+
+    .login-news-section h2 {
+        font-size: 1.1rem;
+    }
+
+    .news-card {
+        grid-template-columns: 1fr;
+    }
+
+    .news-image {
+        height: 150px;
+    }
+
+    .news-content {
+        padding: 0.8rem;
+    }
+
+    .news-content h3 {
+        font-size: 1.1rem;
+    }
+
+    .news-content p {
+        font-size: 0.85rem;
+    }
+
+    .auth-card {
+        padding: 1.2rem;
+    }
+
+    .auth-logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .auth-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .form-group input {
+        padding: 0.8rem 0.8rem;
+        font-size: 0.9rem;
     }
 
     .top-bar {

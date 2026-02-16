@@ -9,23 +9,123 @@
 <body>
     <!-- Login Page -->
     <div id="loginPage" class="login-container">
-        <div class="login-box">
-            <div class="login-header">
-                <h1>IskoArena</h1>
-                <p>University Intramurals Tracker</p>
+        <!-- Top Navigation Bar -->
+        <nav class="login-nav">
+            <div class="nav-brand">
+                <img src="assets/images/logo1.jpg" alt="IskoArena Logo" class="nav-logo">
+                <span class="nav-title">IskoArena</span>
             </div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" placeholder="Enter username" required>
+            <div class="nav-auth-buttons">
+                <button class="nav-btn nav-login-btn" id="navLoginBtn">Login</button>
+                <button class="nav-btn nav-signup-btn" id="navSignupBtn">Sign Up</button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="login-main-content">
+            <!-- Left Section: News Feed -->
+            <div class="login-news-section">
+                <h2>IskoArena News</h2>
+                <div class="news-feed">
+                    <!-- News Article 1 -->
+                    <div class="news-card">
+                        <div class="news-image">
+                            <img src="assets/images/news1.jpg" alt="Basketball Tournament" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%22%23A91D3A%22 width=%22300%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2224%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22%3EBasketball Tournament%3C/text%3E%3C/svg%3E'">
+                        </div>
+                        <div class="news-content">
+                            <span class="news-date">Feb 20, 2026</span>
+                            <h3>Basketball Tournament 2026</h3>
+                            <p>Join the most exciting basketball tournament of the year! COS Scions, SOM Tycoons, CSS Stallions, and CCAD Phoenix compete for glory.</p>
+                            <a href="#" class="news-link">Read More →</a>
+                        </div>
+                    </div>
+
+                    <!-- News Article 2 -->
+                    <div class="news-card">
+                        <div class="news-image">
+                            <img src="assets/images/news2.jpg" alt="Volleyball Championship" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%22%23FFD700%22 width=%22300%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2224%22 fill=%22%23A91D3A%22 text-anchor=%22middle%22 dy=%22.3em%22%3EVolleyball Championship%3C/text%3E%3C/svg%3E'">
+                        </div>
+                        <div class="news-content">
+                            <span class="news-date">Feb 18, 2026</span>
+                            <h3>Women's Volleyball Finals</h3>
+                            <p>The CSS Stallions take on CCAD Phoenix in an intense match. Watch the live coverage and see who claims the championship title!</p>
+                            <a href="#" class="news-link">Read More →</a>
+                        </div>
+                    </div>
+
+                    <!-- News Article 3 -->
+                    <div class="news-card">
+                        <div class="news-image">
+                            <img src="assets/images/news3.jpg" alt="Esports Tournament" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%22%238B1528%22 width=%22300%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2224%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22%3EEsports Tournament%3C/text%3E%3C/svg%3E'">
+                        </div>
+                        <div class="news-content">
+                            <span class="news-date">Feb 16, 2026</span>
+                            <h3>Mobile Legends: Bang Bang Finals</h3>
+                            <p>Experience the ultimate gaming competition! Teams compete in intense matches across multiple esports titles. Checkout our live streaming.</p>
+                            <a href="#" class="news-link">Read More →</a>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Enter password" required>
+            </div>
+
+            <!-- Right Section: Auth Forms -->
+            <div class="login-auth-section">
+                <!-- Login Form -->
+                <div id="loginForm" class="auth-form active">
+                    <div class="auth-card">
+                        <div class="auth-header">
+                            <img src="assets/images/logo1.jpg" alt="IskoArena Logo" class="auth-logo">
+                            <h1>Welcome Back</h1>
+                            <p>UP Cebu Intramurals Tracker</p>
+                        </div>
+                        <form id="loginFormElement">
+                            <div class="form-group">
+                                <label for="loginUsername">Username</label>
+                                <input type="text" id="loginUsername" placeholder="Enter your username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Password</label>
+                                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                            <p class="login-hint">Demo: admin / admin123</p>
+                        </form>
+                        <p class="auth-toggle">Don't have an account? <a href="#" id="showSignupBtn">Create one</a></p>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Login</button>
-                <p class="login-hint">Demo: admin / admin123</p>
-            </form>
+
+                <!-- Signup Form -->
+                <div id="signupForm" class="auth-form">
+                    <div class="auth-card">
+                        <div class="auth-header">
+                            <img src="assets/images/logo1.jpg" alt="IskoArena Logo" class="auth-logo">
+                            <h1>Create Account</h1>
+                            <p>Join as an admin officer</p>
+                        </div>
+                        <form id="signupFormElement">
+                            <div class="form-group">
+                                <label for="signupFullName">Full Name</label>
+                                <input type="text" id="signupFullName" placeholder="Enter your full name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupUsername">Username</label>
+                                <input type="text" id="signupUsername" placeholder="Create a username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupPassword">Password</label>
+                                <input type="password" id="signupPassword" placeholder="Create a password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupConfirmPassword">Confirm Password</label>
+                                <input type="password" id="signupConfirmPassword" placeholder="Confirm your password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                            <p id="signupMessage" class="signup-message"></p>
+                        </form>
+                        <p class="auth-toggle">Already have an account? <a href="#" id="showLoginBtn">Sign in</a></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -463,6 +563,13 @@
                         <form id="notificationForm" class="form">
                             <div class="form-row">
                                 <div class="form-group">
+                                    <label for="notificationMessage">Message *</label>
+                                    <textarea id="notificationMessage" placeholder="Notification message" rows="3" required></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
                                     <label for="notificationType">Type *</label>
                                     <select id="notificationType" required>
                                         <option value="">Select Type</option>
@@ -504,7 +611,14 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
+
+                            <button type="submit" class="btn btn-primary">Send Notification</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3>Notifications Sent</h3>
+                        <div id="notificationsList"></div>
                     </div>
                 </section>
 

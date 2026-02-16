@@ -3,8 +3,63 @@
 // ============================================
 
 // ============================================
-// Data Management (localStorage)
+// Authentication Management
 // ============================================
+
+class AuthManager {
+    // Initialize admin accounts if not exists
+    static initializeAdmins() {
+        if (!localStorage.getItem('iskoarenaAdmins')) {
+            const defaultAdmins = [
+                {
+                    id: 1,
+                    username: 'admin',
+                    password: 'admin123',
+                    fullName: 'Administrator',
+                    createdAt: new Date().toISOString()
+                }
+            ];
+            localStorage.setItem('iskoarenaAdmins', JSON.stringify(defaultAdmins));
+        }
+    }
+
+    // Get all admins
+    static getAllAdmins() {
+        return JSON.parse(localStorage.getItem('iskoarenaAdmins')) || [];
+    }
+
+    // Check if username exists
+    static usernameExists(username) {
+        return this.getAllAdmins().some(admin => admin.username === username);
+    }
+
+    // Register new admin
+    static registerAdmin(fullName, username, password) {
+        if (this.usernameExists(username)) {
+            return { success: false, message: 'Username already exists' };
+        }
+
+        const admins = this.getAllAdmins();
+        const newAdmin = {
+            id: Date.now(),
+            username,
+            password,
+            fullName,
+            createdAt: new Date().toISOString()
+        };
+
+        admins.push(newAdmin);
+        localStorage.setItem('iskoarenaAdmins', JSON.stringify(admins));
+        return { success: true, message: 'Account created successfully! You can now login.' };
+    }
+
+    // Verify login credentials
+    static verifyLogin(username, password) {
+        const admin = this.getAllAdmins().find(a => a.username === username && a.password === password);
+        return admin || null;
+    }
+}
+
 
 class DataManager {
     // Initialize default data structure
@@ -767,14 +822,15 @@ function updateArchiveMediaGallery(year = null, sport = null) {
 function handleLogin(e) {
     e.preventDefault();
 
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
 
-    // Simple authentication (hardcoded for demo)
-    if (username === 'admin' && password === 'admin123') {
+    const admin = AuthManager.verifyLogin(username, password);
+
+    if (admin) {
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainDashboard').style.display = 'flex';
-        document.getElementById('adminName').textContent = 'Administrator';
+        document.getElementById('adminName').textContent = admin.fullName;
 
         // Initialize dashboard
         updateDashboardStats();
@@ -784,10 +840,67 @@ function handleLogin(e) {
         updatePlayerTeamDropdown();
         updateNotificationsList();
 
-        UIManager.showSuccess('Welcome back, Administrator!');
+        UIManager.showSuccess(`Welcome back, ${admin.fullName}!`);
     } else {
-        UIManager.showError('Invalid username or password. Try admin/admin123');
+        UIManager.showError('Invalid username or password');
     }
+}
+
+function handleSignup(e) {
+    e.preventDefault();
+
+    const fullName = document.getElementById('signupFullName').value;
+    const username = document.getElementById('signupUsername').value;
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('signupConfirmPassword').value;
+    const messageEl = document.getElementById('signupMessage');
+
+    // Validation
+    if (!fullName || !username || !password || !confirmPassword) {
+        messageEl.textContent = 'Please fill in all fields';
+        messageEl.className = 'signup-message error';
+        return;
+    }
+
+    if (password.length < 6) {
+        messageEl.textContent = 'Password must be at least 6 characters';
+        messageEl.className = 'signup-message error';
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        messageEl.textContent = 'Passwords do not match';
+        messageEl.className = 'signup-message error';
+        return;
+    }
+
+    if (username.length < 3) {
+        messageEl.textContent = 'Username must be at least 3 characters';
+        messageEl.className = 'signup-message error';
+        return;
+    }
+
+    // Register admin
+    const result = AuthManager.registerAdmin(fullName, username, password);
+
+    if (result.success) {
+        messageEl.textContent = result.message;
+        messageEl.className = 'signup-message success';
+        document.getElementById('signupFormElement').reset();
+        
+        // Switch to login after 2 seconds
+        setTimeout(() => {
+            toggleAuthForms();
+        }, 2000);
+    } else {
+        messageEl.textContent = result.message;
+        messageEl.className = 'signup-message error';
+    }
+}
+
+function toggleAuthForms() {
+    document.getElementById('loginForm').classList.toggle('active');
+    document.getElementById('signupForm').classList.toggle('active');
 }
 
 function handleLogout() {
@@ -808,11 +921,43 @@ function handleLogout() {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize authentication
+    AuthManager.initializeAdmins();
+
     // Initialize data
     DataManager.initializeData();
 
-    // Login form
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    // Login/Signup forms
+    document.getElementById('loginFormElement').addEventListener('submit', handleLogin);
+    document.getElementById('signupFormElement').addEventListener('submit', handleSignup);
+    document.getElementById('showSignupBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleAuthForms();
+    });
+    document.getElementById('showLoginBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleAuthForms();
+    });
+
+    // Nav buttons for login page
+    const navLoginBtn = document.getElementById('navLoginBtn');
+    const navSignupBtn = document.getElementById('navSignupBtn');
+    
+    if (navLoginBtn) {
+        navLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('signupForm').classList.remove('active');
+        });
+    }
+    
+    if (navSignupBtn) {
+        navSignupBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('signupForm').classList.add('active');
+            document.getElementById('loginForm').classList.remove('active');
+        });
+    }
 
     // Dashboard navigation
     document.querySelectorAll('.nav-link').forEach(link => {
