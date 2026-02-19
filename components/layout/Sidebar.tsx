@@ -32,7 +32,7 @@ const navItems: { page: PageName; icon: React.ElementType; label: string }[] = [
   { page: "stats", icon: BarChart3, label: "Stats" },
   { page: "media", icon: Image, label: "Media Upload" },
   { page: "teams", icon: Users, label: "Teams & Players" },
-  { page: "notifications", icon: Bell, label: "Notifications" },
+  //{ page: "notifications", icon: Bell, label: "Notifications" },
   { page: "archives", icon: Archive, label: "Archives" },
 ];
 
@@ -108,7 +108,7 @@ export default function Sidebar({ currentPage, onNavigate, onLogout, adminName }
             variant="ghost"
             size="sm"
             onClick={onLogout}
-            className="w-full justify-start text-white/50 hover:bg-red-500/20 hover:text-red-400 group transition-colors"
+            className="w-full justify-start text-white/50 rounded-full hover:bg-red-500/20 hover:text-red-400 group transition-colors"
           >
             <LogOut className="mr-3 h-4 w-4 transition-transform group-hover:-translate-x-1" />
             <span className="text-xs font-semibold uppercase tracking-wider">Logout Session</span>

@@ -25,7 +25,7 @@ export default function ArchivesPage({ results, media }: ArchivesPageProps) {
 
   return (
     <div>
-      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 mb-6">
+      <div className="bg-white rounded-xl p-6 shadow-md border drop-shadow-2xl border-gray-200 mb-6">
         <h3 className="text-[#A91D3A] text-lg font-semibold mb-5">Filter Archives</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
@@ -48,7 +48,7 @@ export default function ArchivesPage({ results, media }: ArchivesPageProps) {
       </div>
 
       {/* Archived Results */}
-      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 mb-6">
+      <div className="bg-white rounded-xl drop-shadow-2xl p-6 shadow-md border border-gray-200 mb-6">
         <h3 className="text-[#A91D3A] text-lg font-semibold mb-5">Archived Results</h3>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -84,7 +84,7 @@ export default function ArchivesPage({ results, media }: ArchivesPageProps) {
       </div>
 
       {/* Archived Media */}
-      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+      <div className="bg-white rounded-xl drop-shadow-2xl p-6 shadow-md border border-gray-200">
         <h3 className="text-[#A91D3A] text-lg font-semibold mb-5">Archived Media</h3>
         {filteredMedia.length === 0 ? (
           <p className="text-center text-gray-400 italic py-10">No archived media found.</p>
