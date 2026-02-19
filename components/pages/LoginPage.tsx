@@ -1,7 +1,20 @@
 "use client";
+
 import React, { useState } from "react";
 import { AuthManager } from "@/lib/dataManager";
 import type { Admin } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Trophy, ArrowRight, UserPlus, LogIn } from "lucide-react";
 
 interface LoginPageProps {
   onLogin: (admin: Admin) => void;
@@ -11,50 +24,57 @@ const newsItems = [
   {
     date: "Feb 20, 2026",
     title: "Basketball Tournament 2026",
-    body: "Join the most exciting basketball tournament of the year! COS Scions, SOM Tycoons, CSS Stallions, and CCAD Phoenix compete for glory.",
-    bg: "#A91D3A",
-    color: "white",
+    body: "Join the most exciting basketball tournament of the year! COS Scions, SOM Tycoons, and more compete for glory.",
+    variant: "maroon",
   },
   {
     date: "Feb 18, 2026",
     title: "Women's Volleyball Finals",
-    body: "The CSS Stallions take on CCAD Phoenix in an intense match. Watch the live coverage and see who claims the championship title!",
-    bg: "#FFD700",
-    color: "#A91D3A",
+    body: "The CSS Stallions take on CCAD Phoenix in an intense match. Watch the live coverage and see who wins!",
+    variant: "gold",
   },
   {
     date: "Feb 16, 2026",
-    title: "Mobile Legends: Bang Bang Finals",
-    body: "Experience the ultimate gaming competition! Teams compete in intense matches across multiple esports titles. Checkout our live streaming.",
-    bg: "#8B1528",
-    color: "white",
+    title: "Mobile Legends: Bang Bang",
+    body: "Experience the ultimate gaming competition! Teams compete in intense matches across multiple titles.",
+    variant: "maroon-dark",
   },
 ];
+
+const bgColors: Record<string, string> = {
+  maroon: "bg-maroon-primary border-maroon-secondary text-white",
+  gold: "bg-gold-primary border-yellow-600 text-maroon-primary",
+  "maroon-dark": "bg-maroon-secondary border-black/20 text-white",
+};
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
   const [showSignup, setShowSignup] = useState(false);
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
-  const [signupForm, setSignupForm] = useState({ fullName: "", username: "", password: "", confirmPassword: "" });
+  const [signupForm, setSignupForm] = useState({
+    fullName: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [signupMsg, setSignupMsg] = useState<{ text: string; ok: boolean } | null>(null);
-
-  const inputCls =
-    "w-full px-4 py-3 border border-yellow-400/30 rounded-lg bg-white/5 text-white text-sm placeholder-white/50 focus:outline-none focus:bg-white/10 focus:border-yellow-400 focus:shadow-[0_0_12px_rgba(255,215,0,0.3)] transition-all";
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const admin = AuthManager.verifyLogin(loginForm.username, loginForm.password);
-    if (admin) { onLogin(admin); }
-    else { alert("Invalid username or password"); }
+    if (admin) onLogin(admin);
+    else alert("Invalid username or password");
   };
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     setSignupMsg(null);
     const { fullName, username, password, confirmPassword } = signupForm;
-    if (!fullName || !username || !password || !confirmPassword) { setSignupMsg({ text: "Please fill in all fields", ok: false }); return; }
-    if (password.length < 6) { setSignupMsg({ text: "Password must be at least 6 characters", ok: false }); return; }
-    if (password !== confirmPassword) { setSignupMsg({ text: "Passwords do not match", ok: false }); return; }
-    if (username.length < 3) { setSignupMsg({ text: "Username must be at least 3 characters", ok: false }); return; }
+
+    if (password !== confirmPassword) {
+      setSignupMsg({ text: "Passwords do not match", ok: false });
+      return;
+    }
+
     const result = AuthManager.registerAdmin(fullName, username, password);
     setSignupMsg({ text: result.message, ok: result.success });
     if (result.success) {
@@ -64,135 +84,171 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(135deg, rgba(169,29,58,0.95) 0%, rgba(139,21,40,0.95) 60%)", color: "#fff" }}>
-      {/* Nav */}
-      <nav
-        className="fixed top-0 left-0 right-0 z-[1000] flex justify-between items-center px-8 py-4 border-b border-yellow-400/10 shadow-[0_6px_30px_rgba(0,0,0,0.35)]"
-        style={{ background: "linear-gradient(90deg, #8B1528, #A91D3A)" }}
-      >
-        <div className="flex items-center gap-4 cursor-pointer hover:scale-105 transition-transform">
-          <div className="w-11 h-11 rounded-lg bg-yellow-400/20 flex items-center justify-center text-2xl shadow-[0_4px_12px_rgba(255,215,0,0.3)]">🏆</div>
-          <span className="text-2xl font-bold text-yellow-400 tracking-wide">IskoArena</span>
-        </div>
-        <div className="flex gap-4">
-          <button
-            onClick={() => setShowSignup(false)}
-            className="px-6 py-2 border-2 border-yellow-400 text-yellow-400 rounded-md text-sm font-semibold transition-all hover:bg-yellow-400 hover:text-[#A91D3A] hover:-translate-y-0.5"
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setShowSignup(true)}
-            className="px-6 py-2 bg-yellow-400 text-[#A91D3A] rounded-md text-sm font-semibold transition-all hover:bg-yellow-300 hover:-translate-y-0.5"
-          >
-            Sign Up
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-maroon-primary to-maroon-secondary text-white selection:bg-gold-primary selection:text-maroon-primary">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-maroon-primary/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-gold-primary" />
+            <span className="text-xl font-bold tracking-tight text-gold-primary">IskoArena</span>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant={!showSignup ? "secondary" : "ghost"} 
+              size="sm" 
+              onClick={() => setShowSignup(false)}
+            >
+              Login
+            </Button>
+            <Button 
+              variant={showSignup ? "secondary" : "ghost"} 
+              size="sm" 
+              onClick={() => setShowSignup(true)}
+            >
+              Sign Up
+            </Button>
+          </div>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-12 px-8 pt-6 pb-8 max-w-[1400px] mx-auto w-full mt-20">
-        {/* News */}
-        <div className="flex flex-col">
-          <h2 className="text-3xl font-bold text-yellow-400 mb-6">IskoArena News</h2>
-          <div className="flex flex-col gap-6">
+      <main className="max-w-7xl mx-auto px-6 pt-32 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        
+        {/* News Section */}
+        <section className="space-y-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gold-primary mb-2">Latest Updates</h2>
+            <p className="text-white/60">Stay tuned with UP Cebu Intramurals news.</p>
+          </div>
+          
+          <div className="grid gap-4">
             {newsItems.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-xl overflow-hidden border border-yellow-400/20 bg-white/5 backdrop-blur-sm cursor-pointer transition-all hover:-translate-y-1 hover:border-yellow-400 hover:shadow-[0_18px_40px_rgba(169,29,58,0.35)]"
-              >
-                <div
-                  className="w-full h-[160px] flex items-center justify-center text-2xl font-bold"
-                  style={{ background: item.bg, color: item.color }}
-                >
-                  {item.title}
-                </div>
-                <div className="p-5">
-                  <span className="text-xs text-yellow-400 font-semibold uppercase tracking-wide">{item.date}</span>
-                  <h3 className="text-lg font-bold text-white mt-2 mb-2">{item.title}</h3>
-                  <p className="text-white/80 text-sm leading-relaxed mb-3">{item.body}</p>
-                  <a href="#" className="text-yellow-400 text-sm font-semibold hover:text-yellow-300 hover:translate-x-1 transition-all inline-block">
-                    Read More →
-                  </a>
-                </div>
-              </div>
+              <Card key={item.title} className={`${bgColors[item.variant]} border transition-all hover:scale-[1.02]`}>
+                <CardHeader className="pb-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">{item.date}</p>
+                  <CardTitle className="text-xl">{item.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm leading-relaxed opacity-90">{item.body}</p>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="ghost" size="sm" className="px-0 hover:bg-transparent text-inherit font-bold">
+                    Read More <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </CardFooter>
+              </Card>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Auth Forms */}
-        <div className="flex items-start justify-center pt-2">
-          <div className="w-full max-w-[450px]">
-            {/* Auth Card */}
-            <div className="rounded-2xl p-10 shadow-[0_30px_80px_rgba(0,0,0,0.55)] border border-yellow-400/20 backdrop-blur-md" style={{ background: "rgba(0,0,0,0.18)" }}>
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 rounded-xl bg-yellow-400/20 flex items-center justify-center text-3xl shadow-[0_6px_20px_rgba(255,215,0,0.4)] mx-auto mb-4">🏆</div>
-                <h1 className="text-2xl font-bold text-white">{showSignup ? "Create Account" : "Welcome Back"}</h1>
-                <p className="text-white/70 text-sm mt-1">{showSignup ? "Join as an admin officer" : "UP Cebu Intramurals Tracker"}</p>
+        {/* Auth Section */}
+        <section className="flex justify-center lg:justify-end">
+          <Card className="w-full max-w-md bg-white text-slate-950 shadow-2xl">
+            <CardHeader className="space-y-1 text-center">
+              <div className="mx-auto w-12 h-12 bg-maroon-primary rounded-full flex items-center justify-center mb-4">
+                <Trophy className="w-6 h-6 text-gold-primary" />
               </div>
+              <CardTitle className="text-2xl font-bold">
+                {showSignup ? "Create Account" : "Welcome Back"}
+              </CardTitle>
+              <CardDescription>
+                {showSignup ? "Join as an admin officer" : "Enter your credentials to manage IskoArena"}
+              </CardDescription>
+            </CardHeader>
 
-              {!showSignup ? (
-                <form onSubmit={handleLogin}>
-                  <div className="mb-5">
-                    <label className="block text-sm font-semibold text-white/90 mb-2">Username</label>
-                    <input type="text" className={inputCls} placeholder="Enter your username" value={loginForm.username} onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })} required />
+            <CardContent>
+              <form onSubmit={showSignup ? handleSignup : handleLogin} className="space-y-4">
+                {showSignup && (
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      placeholder="Juan Dela Cruz"
+                      value={signupForm.fullName}
+                      onChange={(e) => setSignupForm({ ...signupForm, fullName: e.target.value })}
+                      required
+                    />
                   </div>
-                  <div className="mb-5">
-                    <label className="block text-sm font-semibold text-white/90 mb-2">Password</label>
-                    <input type="password" className={inputCls} placeholder="Enter your password" value={loginForm.password} onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} required />
+                )}
+                
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    placeholder="admin_isko"
+                    value={showSignup ? signupForm.username : loginForm.username}
+                    onChange={(e) => showSignup 
+                      ? setSignupForm({ ...signupForm, username: e.target.value })
+                      : setLoginForm({ ...loginForm, username: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={showSignup ? signupForm.password : loginForm.password}
+                    onChange={(e) => showSignup 
+                      ? setSignupForm({ ...signupForm, password: e.target.value })
+                      : setLoginForm({ ...loginForm, password: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                {showSignup && (
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={signupForm.confirmPassword}
+                      onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
+                      required
+                    />
                   </div>
-                  <button
-                    type="submit"
-                    className="w-full py-3 font-semibold rounded-lg uppercase tracking-wide transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(255,215,0,0.4)] mt-2"
-                    style={{ background: "linear-gradient(135deg, #FFD700 0%, #ffed4e 100%)", color: "#A91D3A" }}
-                  >
-                    Sign In
-                  </button>
-                  <p className="text-center text-yellow-400/80 text-sm mt-4 font-medium">Demo: admin / admin123</p>
-                </form>
-              ) : (
-                <form onSubmit={handleSignup}>
-                  {["fullName", "username", "password", "confirmPassword"].map((field) => (
-                    <div key={field} className="mb-4">
-                      <label className="block text-sm font-semibold text-white/90 mb-2">
-                        {{ fullName: "Full Name", username: "Username", password: "Password", confirmPassword: "Confirm Password" }[field]}
-                      </label>
-                      <input
-                        type={field.toLowerCase().includes("password") ? "password" : "text"}
-                        className={inputCls}
-                        placeholder={{ fullName: "Enter your full name", username: "Create a username", password: "Create a password", confirmPassword: "Confirm your password" }[field]}
-                        value={(signupForm as Record<string, string>)[field]}
-                        onChange={(e) => setSignupForm({ ...signupForm, [field]: e.target.value })}
-                        required
-                      />
-                    </div>
-                  ))}
-                  {signupMsg && (
-                    <p className={`text-center text-sm font-semibold mb-3 ${signupMsg.ok ? "text-green-400" : "text-red-400"}`}>{signupMsg.text}</p>
+                )}
+
+                {signupMsg && (
+                  <div className={`p-3 rounded-md text-sm text-center font-medium ${signupMsg.ok ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                    {signupMsg.text}
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full bg-maroon-primary hover:bg-maroon-secondary text-white">
+                  {showSignup ? (
+                    <><UserPlus className="mr-2 w-4 h-4" /> Register</>
+                  ) : (
+                    <><LogIn className="mr-2 w-4 h-4" /> Sign In</>
                   )}
-                  <button
-                    type="submit"
-                    className="w-full py-3 font-semibold rounded-lg uppercase tracking-wide transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(255,215,0,0.4)] mt-2"
-                    style={{ background: "linear-gradient(135deg, #FFD700 0%, #ffed4e 100%)", color: "#A91D3A" }}
-                  >
-                    Create Account
-                  </button>
-                </form>
-              )}
+                </Button>
+              </form>
+            </CardContent>
 
-              <p className="text-center text-white/80 text-sm mt-6">
-                {showSignup ? "Already have an account? " : "Don't have an account? "}
-                <button
+            <CardFooter className="flex flex-col gap-4 border-t pt-6">
+              {!showSignup && (
+                <p className="text-xs text-center text-slate-500 italic">
+                  Demo Access: <span className="font-bold text-maroon-primary">admin / admin123</span>
+                </p>
+              )}
+              <div className="text-sm text-center text-slate-600">
+                {showSignup ? "Already have an account?" : "New to the platform?"}
+                <Button 
+                  variant="link" 
+                  className="px-2 text-maroon-primary font-bold" 
                   onClick={() => { setShowSignup(!showSignup); setSignupMsg(null); }}
-                  className="text-yellow-400 font-bold hover:text-yellow-300 hover:underline cursor-pointer"
                 >
-                  {showSignup ? "Sign in" : "Create one"}
-                </button>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+                  {showSignup ? "Log in here" : "Create an account"}
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        </section>
+      </main>
     </div>
   );
 }
