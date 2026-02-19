@@ -48,8 +48,18 @@ export default function TeamsPage({ players, onAddPlayer, onDeletePlayer, onDele
       )
       .sort((a, b) => {
         const dir = sortDir === "asc" ? 1 : -1;
-        const va = (a as Record<string, unknown>)[sortKey] ?? "";
-        const vb = (b as Record<string, unknown>)[sortKey] ?? "";
+        const getVal = (obj: Player): string | number => {
+          switch (sortKey) {
+            case "name": return obj.name;
+            case "college": return obj.college;
+            case "sport": return obj.sport;
+            case "jersey": return obj.jersey;
+            case "position": return obj.position;
+            default: return "";
+          }
+        };
+        const va = getVal(a);
+        const vb = getVal(b);
         if (typeof va === "number" && typeof vb === "number") return (va - vb) * dir;
         return String(va).localeCompare(String(vb)) * dir;
       });
@@ -103,7 +113,19 @@ export default function TeamsPage({ players, onAddPlayer, onDeletePlayer, onDele
 
   const handleExport = () => {
     const headers = ["id","name","college","sport","position","jersey","createdAt"];
-    exportCSV(headers, players.map((p) => headers.map((h) => csvEscape((p as Record<string,unknown>)[h]))), "players.csv");
+    exportCSV(
+      headers,
+      players.map((p) =>
+        headers.map((h) => {
+          const row: Record<string, unknown> = {
+            id: p.id, name: p.name, college: p.college,
+            sport: p.sport, position: p.position, jersey: p.jersey, createdAt: p.createdAt,
+          };
+          return csvEscape(row[h]);
+        })
+      ),
+      "players.csv"
+    );
   };
 
   const handleSort = (key: string) => {
@@ -282,3 +304,4 @@ export default function TeamsPage({ players, onAddPlayer, onDeletePlayer, onDele
     </div>
   );
 }
+

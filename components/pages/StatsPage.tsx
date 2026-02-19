@@ -52,8 +52,19 @@ export default function StatsPage({ stats, players, onAddStat, onUpdateStat, onD
       })
       .sort((a, b) => {
         const dir = sortDir === "asc" ? 1 : -1;
-        const va = (a as Record<string, unknown>)[sortKey] ?? "";
-        const vb = (b as Record<string, unknown>)[sortKey] ?? "";
+        const getVal = (obj: Stat): string | number => {
+          switch (sortKey) {
+            case "type": return obj.type;
+            case "sport": return obj.sport;
+            case "college": return obj.college;
+            case "statName": return obj.statName;
+            case "statValue": return String(obj.statValue);
+            case "createdAt": return obj.createdAt;
+            default: return "";
+          }
+        };
+        const va = getVal(a);
+        const vb = getVal(b);
         if (sortKey === "createdAt") return (new Date(String(va)).getTime() - new Date(String(vb)).getTime()) * dir;
         return String(va).localeCompare(String(vb)) * dir;
       });
@@ -89,7 +100,19 @@ export default function StatsPage({ stats, players, onAddStat, onUpdateStat, onD
 
   const handleExport = () => {
     const headers = ["id","type","sport","college","playerId","statName","statValue","createdAt"];
-    exportCSV(headers, stats.map((s) => headers.map((h) => csvEscape((s as Record<string,unknown>)[h]))), "stats.csv");
+    exportCSV(
+      headers,
+      stats.map((s) =>
+        headers.map((h) => {
+          const row: Record<string, unknown> = {
+            id: s.id, type: s.type, sport: s.sport, college: s.college,
+            playerId: s.playerId, statName: s.statName, statValue: s.statValue, createdAt: s.createdAt,
+          };
+          return csvEscape(row[h]);
+        })
+      ),
+      "stats.csv"
+    );
   };
 
   const thCls = (key: string) =>
@@ -229,3 +252,4 @@ export default function StatsPage({ stats, players, onAddStat, onUpdateStat, onD
     </div>
   );
 }
+

@@ -152,23 +152,38 @@ export const DataManager = {
     return newItem;
   },
 
-  delete(type: keyof AppData, id: number): void {
+  delete<K extends keyof AppData>(type: K, id: number): void {
     const data = this.getData();
-    (data[type] as { id: number }[]) = (data[type] as { id: number }[]).filter(
-      (item) => item.id !== id
-    );
+    const arr = data[type] as AppData[K] & { id: number }[];
+    const filtered = arr.filter((item) => item.id !== id);
+
+    data[type] = filtered as AppData[K];
+
     this.saveData(data);
   },
 
-  update<T extends { id: number }>(type: keyof AppData, id: number, updatedItem: Partial<T>): void {
-    const data = this.getData();
-    const arr = data[type] as T[];
-    const index = arr.findIndex((item) => item.id === id);
-    if (index !== -1) {
-      arr[index] = { ...arr[index], ...updatedItem };
-      this.saveData(data);
-    }
-  },
+    update<K extends keyof AppData>(
+  type: K,
+  id: number,
+  updatedItem: Partial<AppData[K][number]>
+): void {
+  const data = this.getData();
+
+  const arr = data[type] as AppData[K];
+  const index = (arr as { id: number }[]).findIndex(
+    (item) => item.id === id
+  );
+
+  if (index !== -1) {
+    (arr as any)[index] = {
+      ...(arr as any)[index],
+      ...updatedItem,
+    };
+    this.saveData(data);
+  }
+},
+
+
 };
 
 // ============================================
@@ -290,3 +305,4 @@ export function resizeImageFile(
   };
   reader.readAsDataURL(file);
 }
+
