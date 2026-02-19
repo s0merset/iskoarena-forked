@@ -190,14 +190,29 @@ class UIManager {
     // Show success message
     static showSuccess(message) {
         console.log('✓ ' + message);
-        // Could be enhanced with toast notifications
+        showToast('success', message);
     }
 
     // Show error message
     static showError(message) {
         console.error('✗ ' + message);
-        alert('Error: ' + message);
+        showToast('error', message);
     }
+}
+
+// Simple toast notification helper
+function showToast(type, message, timeout = 4500) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `toast ${type === 'error' ? 'error' : 'success'}`;
+    toast.innerHTML = `<div class="toast-message">${message}</div><button class="close" aria-label="Close">×</button>`;
+    const closeBtn = toast.querySelector('.close');
+    closeBtn.addEventListener('click', () => { toast.remove(); });
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.remove();
+    }, timeout);
 }
 
 // ============================================
@@ -227,6 +242,67 @@ function updateDashboardStats() {
 
     // Update recent matches table
     updateRecentMatchesTable();
+    updateUpcomingMatches();
+}
+
+function formatMatchShort(match) {
+    return `${match.sport} — ${match.teamA} vs ${match.teamB} (${match.date} ${match.time})`;
+}
+
+function updateUpcomingMatches() {
+    const matches = DataManager.get('matches') || [];
+    const now = new Date();
+    const upcoming = matches.filter(m => new Date(`${m.date}T${m.time}`) >= now).slice(0,6);
+    const today = matches.filter(m => {
+        const d = new Date(`${m.date}T${m.time}`);
+        return d.toDateString() === now.toDateString();
+    }).sort((a,b) => new Date(`${a.date}T${a.time}`)-new Date(`${b.date}T${b.time}`));
+
+    const upcomingEl = document.getElementById('upcomingMatchesList');
+    const todayEl = document.getElementById('todayMatchesList');
+
+    if (upcomingEl) {
+        if (upcoming.length === 0) upcomingEl.innerHTML = '<p class="empty-state">No upcoming matches.</p>';
+        else upcomingEl.innerHTML = upcoming.map(m => `
+            <div class="match-item">
+                <div>
+                    <div style="font-weight:600;color:var(--primary-maroon)">${m.sport}</div>
+                    <div class="meta">${m.teamA} vs ${m.teamB} — ${m.date} ${m.time}</div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="UIManager.showPage('matches'); highlightMatch(${m.id})">View</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    if (todayEl) {
+        if (today.length === 0) todayEl.innerHTML = '<p class="empty-state">No matches today.</p>';
+        else todayEl.innerHTML = today.map(m => `
+            <div class="match-item">
+                <div>
+                    <div style="font-weight:600;color:var(--primary-maroon)">${m.teamA} vs ${m.teamB}</div>
+                    <div class="meta">${m.sport} • ${m.time} • ${m.venue || ''}</div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="UIManager.showPage('results');">Record Result</button>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function highlightMatch(matchId) {
+    UIManager.showPage('matches');
+    // Scroll to matches table and briefly highlight row if present
+    setTimeout(() => {
+        const row = document.querySelector(`#matchesTable tr[data-id-attr="${matchId}"]`);
+        if (row) {
+            row.style.boxShadow = '0 6px 20px rgba(169,29,58,0.12)';
+            row.scrollIntoView({behavior:'smooth',block:'center'});
+            setTimeout(() => row.style.boxShadow = '', 3000);
+        }
+    }, 200);
 }
 
 function updateRecentMatchesTable() {
@@ -1033,7 +1109,7 @@ function renderPlayers(players) {
     tbody.innerHTML = pageItems.map(player => {
         const photoHtml = player.photo ? `<img src="${player.photo}" alt="${player.name}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:8px;vertical-align:middle;"> ` : '';
         return `
-            <tr>
+            <tr class="player-row" data-player-id="${player.id}">
                 <td>${photoHtml}${player.name}</td>
                 <td>${player.college || 'Unassigned'}</td>
                 <td>${player.sport || ''}</td>
@@ -1058,6 +1134,64 @@ function renderPlayers(players) {
     const totalPages = Math.max(1, Math.ceil(total / perPage));
     pager.innerHTML = `Page ${page} of ${totalPages}`;
     tbody.parentElement.appendChild(pager);
+
+    // Attach hover & click handlers for player detail panel
+    setTimeout(() => {
+        document.querySelectorAll('tr.player-row').forEach(row => {
+            const id = parseInt(row.getAttribute('data-player-id'),10);
+            row.addEventListener('mouseenter', () => { if (!window._playerDetailPinned) showPlayerDetail(id, false); });
+            row.addEventListener('mouseleave', () => { if (!window._playerDetailPinned) hidePlayerDetail(); });
+            row.addEventListener('click', () => { window._playerDetailPinned = true; showPlayerDetail(id, true); });
+        });
+    }, 10);
+}
+
+function showPlayerDetail(playerId, pinned) {
+    const panel = document.getElementById('playerDetailPanel');
+    if (!panel) return;
+    const player = DataManager.get('players').find(p => p.id === playerId);
+    if (!player) return;
+    document.getElementById('detailPhoto').src = player.photo || 'assets/images/avatar-placeholder.png';
+    document.getElementById('detailName').textContent = player.name || '';
+    document.getElementById('detailCollege').textContent = player.college || '';
+    document.getElementById('detailSport').textContent = player.sport || '';
+    document.getElementById('detailPosition').textContent = player.position || '-';
+    document.getElementById('detailJersey').textContent = player.jersey != null ? player.jersey : '-';
+    document.getElementById('detailJoined').textContent = player.createdAt ? new Date(player.createdAt).toLocaleDateString() : '-';
+    document.getElementById('detailTeam').textContent = player.teamName || '-';
+
+    // Populate stats (from DataManager or filler)
+    const stats = DataManager.get('stats') || [];
+    const playerStats = stats.filter(s => s.playerId === playerId);
+    const statsContainer = document.getElementById('detailStatsContent');
+    if (playerStats && playerStats.length > 0) {
+        statsContainer.innerHTML = playerStats.map(s => `<div class="stat-row"><div class="stat-name">${s.statName}</div><div class="stat-value">${s.statValue}</div></div>`).join('');
+    } else {
+        // filler stats based on sport
+        let filler = [];
+        if ((player.sport || '').toLowerCase().includes('basket')) filler = [ ['Points', Math.floor(Math.random()*20)], ['Assists', Math.floor(Math.random()*8)], ['Rebounds', Math.floor(Math.random()*12)] ];
+        else if ((player.sport || '').toLowerCase().includes('volley')) filler = [ ['Kills', Math.floor(Math.random()*15)], ['Blocks', Math.floor(Math.random()*6)], ['Aces', Math.floor(Math.random()*4)] ];
+        else if ((player.sport || '').toLowerCase().includes('soccer') || (player.sport || '').toLowerCase().includes('football')) filler = [ ['Goals', Math.floor(Math.random()*5)], ['Assists', Math.floor(Math.random()*5)] ];
+        else filler = [ ['Appearances', Math.floor(Math.random()*10)], ['Notes', 'N/A'] ];
+
+        statsContainer.innerHTML = filler.map(s => `<div class="stat-row"><div class="stat-name">${s[0]}</div><div class="stat-value">${s[1]}</div></div>`).join('');
+    }
+
+    // Wire edit/delete buttons
+    const editBtn = document.getElementById('editPlayerBtn');
+    if (editBtn) { editBtn.onclick = () => { UIManager.showPage('teams'); document.getElementById('playerName').value = player.name; /* more prefill could be added */ showToast('success','Prefilled player form for editing (manual save)'); }; }
+    const delBtn = document.getElementById('deletePlayerBtn');
+    if (delBtn) { delBtn.onclick = () => { deletePlayer(playerId); hidePlayerDetail(); }; }
+
+    panel.style.display = 'block';
+    if (pinned) window._playerDetailPinned = true;
+}
+
+function hidePlayerDetail() {
+    const panel = document.getElementById('playerDetailPanel');
+    if (!panel) return;
+    panel.style.display = 'none';
+    window._playerDetailPinned = false;
 }
 
 function filterAndRenderPlayers() {
@@ -1408,6 +1542,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const playerSportEl = document.getElementById('playerSport');
     if (playerSportEl) playerSportEl.addEventListener('change', onPlayerSportChange);
 
+    // Import input placed on Add New Player form (single hidden input + styled label)
+    const importPlayersFileAdd = document.getElementById('importPlayersFileAdd');
+    if (importPlayersFileAdd) importPlayersFileAdd.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const name = (file.name || '').toLowerCase();
+        if (name.endsWith('.xls') || name.endsWith('.xlsx')) {
+            handleImportFile(file);
+        } else {
+            importPlayersCSV(file);
+        }
+    });
+
     // Player photo preview, drag-drop and clear
     const playerPhotoInput = document.getElementById('playerPhoto');
     const playerPhotoDrop = document.getElementById('playerPhotoDrop');
@@ -1496,13 +1643,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Export/Import CSV handlers
     const exportPlayersBtn = document.getElementById('exportPlayersBtn');
     if (exportPlayersBtn) exportPlayersBtn.addEventListener('click', (e) => { e.preventDefault(); exportPlayersCSV(); });
-    const importPlayersFile = document.getElementById('importPlayersFile');
-    if (importPlayersFile) importPlayersFile.addEventListener('change', (e) => { importPlayersCSV(e.target.files[0]); });
+    // Players import is exposed on the Add New Player card (single import control)
+
+    // Import modal buttons
+    const importConfirmBtn = document.getElementById('importConfirm');
+    if (importConfirmBtn) importConfirmBtn.addEventListener('click', (e) => { e.preventDefault(); importMappedPlayers(); });
+    const importCancelBtn = document.getElementById('importCancel');
+    if (importCancelBtn) importCancelBtn.addEventListener('click', (e) => { e.preventDefault(); closeImportModal(); });
+    document.querySelectorAll('.import-close').forEach(el => el.addEventListener('click', () => closeImportModal()));
 
     const exportStatsBtn = document.getElementById('exportStatsBtn');
     if (exportStatsBtn) exportStatsBtn.addEventListener('click', (e) => { e.preventDefault(); exportStatsCSV(); });
-    const importStatsFile = document.getElementById('importStatsFile');
-    if (importStatsFile) importStatsFile.addEventListener('change', (e) => { importStatsCSV(e.target.files[0]); });
 
     // Filters and search for players
     const searchEl = document.getElementById('playerSearch');
@@ -1539,6 +1690,54 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mobile menu toggle
     document.getElementById('menuToggle').addEventListener('click', () => {
         document.body.classList.toggle('sidebar-open');
+    });
+
+    // Close player detail panel
+    const closePlayerDetailBtn = document.getElementById('closePlayerDetail');
+    if (closePlayerDetailBtn) closePlayerDetailBtn.addEventListener('click', (e) => { e.preventDefault(); hidePlayerDetail(); });
+
+    // Quick action buttons on dashboard
+    const quickAddMatch = document.getElementById('quickAddMatch');
+    if (quickAddMatch) quickAddMatch.addEventListener('click', (e) => { e.preventDefault(); UIManager.showPage('matches'); document.getElementById('sport')?.focus(); });
+    const quickAddPlayer = document.getElementById('quickAddPlayer');
+    if (quickAddPlayer) quickAddPlayer.addEventListener('click', (e) => { e.preventDefault(); UIManager.showPage('teams'); document.getElementById('playerName')?.focus(); });
+
+    // Top-bar quick search behavior
+    const quickSearch = document.getElementById('quickSearch');
+    if (quickSearch) {
+        quickSearch.addEventListener('input', (e) => {
+            const q = e.target.value || '';
+            const playerSearch = document.getElementById('playerSearch');
+            if (playerSearch) {
+                playerSearch.value = q;
+                filterAndRenderPlayers();
+                // if user is on another page, hint to open Teams
+            }
+        });
+
+        // Keyboard shortcut Ctrl+K to focus quick search
+        document.addEventListener('keydown', (ev) => {
+            if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'k') {
+                ev.preventDefault(); quickSearch.focus(); quickSearch.select();
+            }
+        });
+    }
+
+    // Theme toggle (dark mode)
+    const themeToggle = document.getElementById('themeToggle');
+    function applyTheme(isDark) {
+        if (isDark) document.body.classList.add('dark-mode');
+        else document.body.classList.remove('dark-mode');
+        themeToggle.textContent = isDark ? '☀️' : '🌙';
+    }
+    // Load saved preference
+    const saved = localStorage.getItem('iskoarena_theme');
+    const prefersDark = (saved === 'dark') || (saved === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    applyTheme(prefersDark);
+    if (themeToggle) themeToggle.addEventListener('click', () => {
+        const isDark = !document.body.classList.contains('dark-mode');
+        applyTheme(isDark);
+        localStorage.setItem('iskoarena_theme', isDark ? 'dark' : 'light');
     });
 
     // Load mock data (optional - comment out for clean start)
@@ -1715,6 +1914,138 @@ function importPlayersCSV(file) {
         UIManager.showSuccess('Players imported');
     };
     reader.readAsText(file);
+}
+
+// ============================================
+// Excel/CSV Import with mapping (SheetJS)
+// ============================================
+
+window._importPreviewData = null;
+
+function openImportModal() {
+    const modal = document.getElementById('importModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+}
+
+function closeImportModal() {
+    const modal = document.getElementById('importModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+}
+
+function handleImportFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const data = e.target.result;
+        let workbook;
+        try {
+            // read as array for XLSX
+            const arr = new Uint8Array(data);
+            workbook = XLSX.read(arr, { type: 'array' });
+        } catch (err) {
+            // fallback: try reading as text (CSV)
+            importPlayersCSV(file);
+            return;
+        }
+
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+        if (!json || json.length === 0) {
+            UIManager.showError('No data found in the selected file');
+            return;
+        }
+
+        window._importPreviewData = json;
+        populateMappingSelects(Object.keys(json[0]));
+        renderImportPreview(json.slice(0, 20));
+        openImportModal();
+    };
+    // read as array buffer to support xlsx
+    reader.readAsArrayBuffer(file);
+}
+
+function populateMappingSelects(columns) {
+    const ids = ['mapName','mapCollege','mapSport','mapPosition','mapJersey'];
+    ids.forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        sel.innerHTML = columns.map(c => `<option value="${c}">${c}</option>`).join('');
+        // try auto-select common names
+        const lowered = columns.map(c => c.toLowerCase());
+        if (id === 'mapName') {
+            let i = lowered.indexOf('name'); if (i===-1) i = lowered.indexOf('player'); if (i>=0) sel.value = columns[i];
+        }
+        if (id === 'mapCollege') {
+            let i = lowered.indexOf('college'); if (i===-1) i = lowered.indexOf('team'); if (i>=0) sel.value = columns[i];
+        }
+        if (id === 'mapSport') {
+            let i = lowered.indexOf('sport'); if (i>=0) sel.value = columns[i];
+        }
+        if (id === 'mapPosition') {
+            let i = lowered.indexOf('position'); if (i>=0) sel.value = columns[i];
+        }
+        if (id === 'mapJersey') {
+            let i = lowered.indexOf('jersey'); if (i===-1) i = lowered.indexOf('number'); if (i>=0) sel.value = columns[i];
+        }
+    });
+}
+
+function renderImportPreview(rows) {
+    const container = document.getElementById('importPreview');
+    if (!container) return;
+    if (!rows || rows.length === 0) { container.innerHTML = '<p class="empty-state">No preview available</p>'; return; }
+    const cols = Object.keys(rows[0]);
+    const table = document.createElement('table');
+    table.className = 'table';
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+    const tbody = document.createElement('tbody');
+    rows.forEach(r => {
+        const tr = document.createElement('tr');
+        cols.forEach(c => tr.innerHTML += `<td>${(r[c]||'').toString().slice(0,60)}</td>`);
+        tbody.appendChild(tr);
+    });
+    table.appendChild(thead); table.appendChild(tbody);
+    container.innerHTML = '';
+    container.appendChild(table);
+}
+
+function importMappedPlayers() {
+    const data = window._importPreviewData;
+    if (!data || data.length === 0) { UIManager.showError('No data to import'); return; }
+    const mName = document.getElementById('mapName').value;
+    const mCollege = document.getElementById('mapCollege').value;
+    const mSport = document.getElementById('mapSport').value;
+    const mPosition = document.getElementById('mapPosition').value;
+    const mJersey = document.getElementById('mapJersey').value;
+
+    let imported = 0;
+    data.forEach(row => {
+        const player = {
+            name: (row[mName] || row['Name'] || '').toString().trim(),
+            college: (row[mCollege] || row['College'] || row['Team'] || '').toString().trim(),
+            sport: (row[mSport] || '').toString().trim(),
+            position: (row[mPosition] || '').toString().trim(),
+            jersey: null
+        };
+        const jerseyVal = row[mJersey] || row['Jersey'] || row['Number'] || '';
+        const j = parseInt((''+jerseyVal).toString().replace(/[^0-9]/g,''),10);
+        if (!isNaN(j)) player.jersey = j;
+
+        if (player.name) {
+            DataManager.add('players', player);
+            imported++;
+        }
+    });
+
+    updatePlayersTable();
+    updateDashboardStats();
+    UIManager.showSuccess(`${imported} players imported`);
+    closeImportModal();
+    window._importPreviewData = null;
 }
 
 function exportStatsCSV() {

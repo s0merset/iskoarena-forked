@@ -173,9 +173,15 @@
             <!-- Top Bar -->
             <header class="top-bar">
                 <h1 id="pageTitle">Dashboard</h1>
-                <div class="user-info">
-                    <span id="adminName">Admin</span>
-                    <div class="avatar">👤</div>
+                <div style="flex:1 1 400px;display:flex;justify-content:center;">
+                    <input id="quickSearch" type="search" placeholder="Search players or matches (Ctrl+K)" style="width:100%;max-width:600px;padding:8px 12px;border-radius:8px;border:1px solid var(--border-color);">
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle dark mode">🌙</button>
+                    <div class="user-info">
+                        <span id="adminName">Admin</span>
+                        <div class="avatar">👤</div>
+                    </div>
                 </div>
             </header>
 
@@ -211,6 +217,30 @@
                                 <h3>Total Players</h3>
                                 <p class="stat-number" id="totalPlayers">0</p>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card quick-actions-card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                            <h3>Quick Actions</h3>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <button id="quickAddMatch" class="btn btn-primary">+ Add Match</button>
+                                <button id="quickAddPlayer" class="btn btn-secondary">+ Add Player</button>
+                            </div>
+                        </div>
+                        <p style="margin-top:12px;color:var(--neutral-gray);">Run common admin tasks quickly — create matches, import players, or view today's schedule.</p>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+                        <div class="card" id="upcomingMatchesCard">
+                            <h3>Upcoming Matches</h3>
+                            <div id="upcomingMatchesList">Loading...</div>
+                        </div>
+
+                        <div class="card" id="todayMatchesCard">
+                            <h3>Today's Matches</h3>
+                            <div id="todayMatchesList">Loading...</div>
                         </div>
                     </div>
 
@@ -521,7 +551,11 @@
                             </div>
                             <input type="hidden" id="playerPhotoDataUrl" value="">
                             <div id="playerFormMessage" class="field-error-message" style="display:none;margin-bottom:8px;"></div>
-                            <button type="submit" class="btn btn-primary">Add Player</button>
+                            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                                <button type="submit" class="btn btn-primary">Add Player</button>
+                                <label for="importPlayersFileAdd" class="btn btn-secondary" style="margin-left:8px;">Import Players</label>
+                                <input type="file" id="importPlayersFileAdd" accept=".csv,.xlsx,.xls,text/csv" style="display:none;">
+                            </div>
                         </form>
                     </div>
 
@@ -589,7 +623,6 @@
                         <div class="form-row" style="justify-content:space-between;align-items:center;margin-bottom:8px;">
                             <div>
                                 <button id="exportPlayersBtn" class="btn btn-secondary">Export Players CSV</button>
-                                <input type="file" id="importPlayersFile" accept="text/csv" style="display:inline-block;margin-left:8px;">
                             </div>
                             <div>
                                 <label for="playersPerPage">Rows:</label>
@@ -617,6 +650,39 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <!-- Player Detail Panel (appears when hovering/selecting a player) -->
+                    <div id="playerDetailPanel" class="player-detail-panel" style="display:none;">
+                        <div class="player-detail-header">
+                            <div class="player-detail-title">Player Profile</div>
+                            <button id="closePlayerDetail" class="btn btn-secondary">Close</button>
+                        </div>
+                        <div class="player-detail-body">
+                            <div class="profile-top">
+                                <img id="detailPhoto" src="" alt="Player photo" class="detail-photo">
+                                <div class="detail-main">
+                                    <div id="detailName" class="detail-name">Name</div>
+                                    <div id="detailCollege" class="detail-college">College</div>
+                                    <div id="detailSport" class="detail-sport">Sport</div>
+                                </div>
+                            </div>
+                            <div class="detail-grid">
+                                <div><strong>Position</strong><div id="detailPosition">-</div></div>
+                                <div><strong>Jersey</strong><div id="detailJersey">-</div></div>
+                                <div><strong>Joined</strong><div id="detailJoined">-</div></div>
+                                <div><strong>Team</strong><div id="detailTeam">-</div></div>
+                            </div>
+
+                            <div class="detail-stats">
+                                <h4>Stats</h4>
+                                <div id="detailStatsContent">Loading stats...</div>
+                            </div>
+
+                            <div class="detail-actions" style="margin-top:12px;display:flex;gap:8px;">
+                                <button id="editPlayerBtn" class="btn btn-primary">Edit</button>
+                                <button id="deletePlayerBtn" class="btn btn-danger">Delete</button>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -805,7 +871,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-row">
+                            <div class="form-row stats-actions">
                                 <div class="form-group">
                                     <button type="submit" id="statsSubmitBtn" class="btn btn-primary">Add Stat</button>
                                 </div>
@@ -819,7 +885,7 @@
 
                     <div class="card">
                         <h3>All Stats</h3>
-                        <div class="form-row" style="gap:12px;margin-bottom:8px;">
+                        <div class="form-row stats-filter-row" style="gap:12px;margin-bottom:8px;">
                             <div class="form-group">
                                 <input type="text" id="statsSearch" placeholder="Search stats by name or player...">
                             </div>
@@ -844,7 +910,6 @@
                             </div>
                             <div style="margin-left:auto;">
                                 <button id="exportStatsBtn" class="btn btn-secondary">Export Stats CSV</button>
-                                <input type="file" id="importStatsFile" accept="text/csv" style="display:inline-block;margin-left:8px;">
                             </div>
                         </div>
                         <table class="table">
@@ -869,6 +934,41 @@
             </div>
         </main>
     </div>
+    <!-- Import Players Modal -->
+    <div id="importModal" class="modal import-modal" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close import-close">&times;</span>
+            <h2 id="importModalTitle">Import Players</h2>
+            <p>Select which columns map to player fields, preview rows, then click Import.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                <div>
+                    <label>Name</label>
+                    <select id="mapName"></select>
+                </div>
+                <div>
+                    <label>College</label>
+                    <select id="mapCollege"></select>
+                </div>
+                <div>
+                    <label>Sport</label>
+                    <select id="mapSport"></select>
+                </div>
+                <div>
+                    <label>Position</label>
+                    <select id="mapPosition"></select>
+                </div>
+                <div>
+                    <label>Jersey</label>
+                    <select id="mapJersey"></select>
+                </div>
+            </div>
+            <div style="max-height:240px;overflow:auto;border:1px solid #eee;padding:8px;margin-bottom:8px;" id="importPreview"></div>
+            <div class="modal-buttons">
+                <button id="importConfirm" class="btn btn-primary">Import</button>
+                <button id="importCancel" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal for Editing/Deleting -->
     <div id="modal" class="modal">
@@ -883,6 +983,10 @@
         </div>
     </div>
 
+    <!-- Toast notifications -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
