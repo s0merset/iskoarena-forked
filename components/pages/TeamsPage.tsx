@@ -140,7 +140,7 @@ export default function TeamsPage({ players, onAddPlayer, onDeletePlayer, onDele
   return (
     <div>
       {/* Add Player Form */}
-      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 mb-6">
+      <div className="bg-white drop-shadow-2xl rounded-xl p-6 shadow-md border border-gray-200 mb-6">
         <h3 className="text-[#A91D3A] text-lg font-semibold mb-5">Add New Player</h3>
         {formError && <div className="mb-4 text-red-600 text-sm font-medium bg-red-50 px-4 py-2 rounded-md">{formError}</div>}
         <form onSubmit={handleSubmit}>
@@ -203,7 +203,7 @@ export default function TeamsPage({ players, onAddPlayer, onDeletePlayer, onDele
       </div>
 
       {/* Search & Filter */}
-      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 mb-6">
+      <div className="bg-white rounded-xl drop-shadow-2xl p-6 shadow-md border border-gray-200 mb-6">
         <h3 className="text-[#A91D3A] text-lg font-semibold mb-4">Search Players</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <input type="text" className={inputCls} placeholder="Search players by name..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
@@ -230,7 +230,7 @@ export default function TeamsPage({ players, onAddPlayer, onDeletePlayer, onDele
       </div>
 
       {/* Players Table */}
-      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+      <div className="bg-white rounded-xl drop-shadow-2xl p-6 shadow-md border border-gray-200">
         <h3 className="text-[#A91D3A] text-lg font-semibold mb-4">Teams & Players</h3>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex gap-3 items-center">

@@ -1,25 +1,82 @@
-"use client";
-import React, { useEffect } from "react";
+"use client"
 
-interface ToastProps {
-  message: string;
-  type: "success" | "error";
-  onClose: () => void;
-}
+import * as React from "react"
+import * as ToastPrimitives from "@radix-ui/react-toast"
+import { cva, type VariantProps } from "class-variance-authority"
+import { X } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-export default function Toast({ message, type, onClose }: ToastProps) {
-  useEffect(() => {
-    const t = setTimeout(onClose, 3000);
-    return () => clearTimeout(t);
-  }, [onClose]);
+const ToastProvider = ToastPrimitives.Provider
 
-  return (
-    <div
-      className={`fixed bottom-6 right-6 z-[2000] px-5 py-3 rounded-lg shadow-lg text-white text-sm font-semibold transition-all animate-slide-in ${
-        type === "success" ? "bg-emerald-600" : "bg-red-600"
-      }`}
-    >
-      {type === "success" ? "✓" : "✗"} {message}
-    </div>
-  );
-}
+const ToastViewport = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Viewport>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Viewport
+    ref={ref}
+    className={cn("fixed bottom-0 right-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-6 sm:right-6 md:max-w-[420px]", className)}
+    {...props}
+  />
+))
+ToastViewport.displayName = ToastPrimitives.Viewport.displayName
+
+const toastVariants = cva(
+  // Base classes: Added transition-all and duration-500
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-xl border p-4 pr-8 shadow-lg transition-all duration-500 backdrop-blur-md " +
+  
+  // FADE IN logic:
+  "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-bottom-5 " +
+  
+  // FADE OUT logic:
+  "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-right-full",
+  
+  {
+    variants: {
+      variant: {
+        default: "bg-white/70 border-white/50 text-slate-950",
+        success: "bg-emerald-50/80 border-emerald-500/30 text-emerald-900",
+        destructive: "bg-red-50/80 border-red-500/30 text-red-900",
+      },
+    },
+    defaultVariants: { variant: "default" },
+  }
+)
+
+const Toast = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Root>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & VariantProps<typeof toastVariants>
+>(({ className, variant, ...props }, ref) => (
+  <ToastPrimitives.Root ref={ref} className={cn(toastVariants({ variant }), className)} {...props} />
+))
+Toast.displayName = ToastPrimitives.Root.displayName
+
+const ToastClose = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Close>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Close ref={ref} className={cn("absolute right-2 top-2 rounded-md p-1 text-slate-950/50 opacity-0 transition-opacity hover:text-slate-950 focus:opacity-100 focus:outline-none group-hover:opacity-100", className)} {...props}>
+    <X className="h-4 w-4" />
+  </ToastPrimitives.Close>
+))
+ToastClose.displayName = ToastPrimitives.Close.displayName
+
+const ToastTitle = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Title>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Title ref={ref} className={cn("text-sm font-black tracking-tight", className)} {...props} />
+))
+ToastTitle.displayName = ToastPrimitives.Title.displayName
+
+const ToastDescription = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Description>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Description ref={ref} className={cn("text-xs opacity-90", className)} {...props} />
+))
+ToastDescription.displayName = ToastPrimitives.Description.displayName
+
+type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
+type ToastActionElement = React.ReactElement<typeof ToastPrimitives.Action>
+
+export { type ToastProps, type ToastActionElement, ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose }

@@ -1,8 +1,10 @@
 "use client";
+
 import React, { useState, useEffect, useCallback } from "react";
 import { AuthManager, DataManager } from "@/lib/dataManager";
 import type { Admin, AppData, Match, Result, Player, Stat, MediaItem, Notification, PageName } from "@/types";
 
+// UI Components
 import LoginPage from "@/components/pages/LoginPage";
 import DashboardPage from "@/components/pages/DashboardPage";
 import MatchesPage from "@/components/pages/MatchesPage";
@@ -15,15 +17,20 @@ import ArchivesPage from "@/components/pages/ArchivesPage";
 import Sidebar from "@/components/layout/Sidebar";
 import TopBar from "@/components/layout/TopBar";
 import Modal from "@/components/ui/Modal";
-import Toast from "@/components/ui/Toast";
 
+// Shadcn UI Toast
+import { useToast } from "@/hooks/use-toast";
+import { Toast } from "radix-ui";
+import { Toaster } from "./ui/toaster";
 
 export default function IskoArena() {
   const [currentAdmin, setCurrentAdmin] = useState<Admin | null>(null);
   const [currentPage, setCurrentPage] = useState<PageName>("dashboard");
   const [data, setData] = useState<AppData | null>(null);
   const [logoutModal, setLogoutModal] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  
+  // Initialize Shadcn Toast hook
+  const { toast } = useToast();
 
   useEffect(() => {
     AuthManager.initializeAdmins();
@@ -31,34 +38,45 @@ export default function IskoArena() {
     setData(DataManager.getData());
   }, []);
 
-  const showToast = (message: string, type: "success" | "error" = "success") => {
-    setToast({ message, type });
-  };
-
   const refresh = useCallback(() => setData(DataManager.getData()), []);
 
   const handleLogin = (admin: Admin) => {
     setCurrentAdmin(admin);
     refresh();
-    showToast(`Welcome back, ${admin.fullName}!`);
+    toast({
+      title: "Welcome back!",
+      description: `Successfully signed in as ${admin.fullName}`,
+      variant: "success", // Using the custom variant created earlier
+    });
   };
 
   const handleLogout = () => {
     setCurrentAdmin(null);
     setCurrentPage("dashboard");
-    showToast("You have been logged out.");
+    toast({
+      title: "Logged Out",
+      description: "You have been securely logged out.",
+    });
   };
 
   // ---- Match handlers ----
   const handleAddMatch = (match: Omit<Match, "id" | "createdAt">) => {
     DataManager.add("matches", match);
     refresh();
-    showToast("Match added successfully!");
+    toast({
+      title: "Success",
+      description: "Match added to the schedule.",
+      variant: "success",
+    });
   };
   const handleDeleteMatch = (id: number) => {
     DataManager.delete("matches", id);
     refresh();
-    showToast("Match deleted.");
+    toast({
+      title: "Match Deleted",
+      description: "The match has been removed.",
+      variant: "destructive",
+    });
   };
 
   // ---- Result handlers ----
@@ -66,26 +84,31 @@ export default function IskoArena() {
     const winner = scoreA > scoreB ? teamA : scoreB > scoreA ? teamB : "Draw";
     DataManager.add("results", { matchId, teamA, teamB, scoreA, scoreB, winner, sport });
     refresh();
-    showToast("Result recorded successfully!");
+    toast({
+      title: "Result Recorded",
+      description: `Winner: ${winner}`,
+      variant: "success",
+    });
   };
 
   // ---- Stat handlers ----
   const handleAddStat = (stat: Omit<Stat, "id" | "createdAt">) => {
     DataManager.add("stats", stat);
     refresh();
-    showToast("Stat added!");
+    toast({ title: "Stat added!", variant: "success" });
   };
   const handleUpdateStat = (id: number, stat: Partial<Stat>) => {
     DataManager.update("stats", id, stat);
     refresh();
-    showToast("Stat updated!");
+    toast({ title: "Stat updated!", variant: "success" });
   };
   const handleDeleteStat = (id: number) => {
     DataManager.delete("stats", id);
     refresh();
-    showToast("Stat deleted.");
+    toast({ title: "Stat removed.", variant: "destructive" });
   };
   const handleLoadDemoStats = () => {
+    // Logic for demo stats
     const players = DataManager.get("players");
     const colleges = ["COS Scions", "SOM Tycoons", "CSS Stallions", "CCAD Phoenix"];
     players.slice(0, 6).forEach((p, i) => {
@@ -98,56 +121,53 @@ export default function IskoArena() {
         statValue: Math.floor(Math.random() * 20) + 1,
       });
     });
-    colleges.forEach((col) => {
-      DataManager.add("stats", { type: "Team", sport: "Basketball Men", college: col, playerId: null, statName: "Wins", statValue: Math.floor(Math.random() * 10) });
-    });
     refresh();
-    showToast("Demo stats loaded!");
+    toast({ title: "Demo stats loaded!" });
   };
 
   // ---- Media handlers ----
   const handleUploadMedia = (item: Omit<MediaItem, "id" | "createdAt">) => {
     DataManager.add("media", item);
     refresh();
-    showToast("Media uploaded successfully!");
+    toast({ title: "Media uploaded!", variant: "success" });
   };
 
   // ---- Player handlers ----
   const handleAddPlayer = (player: Omit<Player, "id" | "createdAt">) => {
     DataManager.add("players", player);
     refresh();
-    showToast("Player added successfully!");
+    toast({ title: "Player added.", variant: "success" });
   };
   const handleDeletePlayer = (id: number) => {
     DataManager.delete("players", id);
     refresh();
-    showToast("Player deleted.");
+    toast({ title: "Player removed.", variant: "destructive" });
   };
   const handleDeleteAllPlayers = () => {
     const d = DataManager.getData();
     d.players = [];
     DataManager.saveData(d);
     refresh();
-    showToast("All players removed.");
+    toast({ title: "All players cleared.", variant: "destructive" });
   };
   const handleImportPlayers = (players: Omit<Player, "id" | "createdAt">[]) => {
     players.forEach((p) => DataManager.add("players", p));
     refresh();
-    showToast("Players imported!");
+    toast({ title: "Import complete!", variant: "success" });
   };
 
   // ---- Notification handlers ----
   const handleSendNotification = (notif: Omit<Notification, "id" | "createdAt">) => {
     DataManager.add("notifications", notif);
     refresh();
-    showToast("Notification sent!");
+    toast({ title: "Notification Sent", variant: "success" });
   };
 
   if (!currentAdmin) {
     return (
       <>
         <LoginPage onLogin={handleLogin} />
-        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+        <Toaster />
       </>
     );
   }
@@ -178,12 +198,17 @@ export default function IskoArena() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F5F5F5]">
-      <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} onLogout={() => setLogoutModal(true)} adminName={currentAdmin.fullName} />
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      <Sidebar 
+        currentPage={currentPage} 
+        onNavigate={setCurrentPage} 
+        onLogout={() => setLogoutModal(true)} 
+        adminName={currentAdmin.fullName} 
+      />
 
       <main className="flex-1 flex flex-col overflow-hidden">
         <TopBar currentPage={currentPage} adminName={currentAdmin.fullName} />
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
           {renderPage()}
         </div>
       </main>
@@ -191,12 +216,13 @@ export default function IskoArena() {
       <Modal
         isOpen={logoutModal}
         title="Logout"
-        message="Are you sure you want to logout?"
+        message="Are you sure you want to logout of IskoArena?"
         onConfirm={() => { setLogoutModal(false); handleLogout(); }}
         onCancel={() => setLogoutModal(false)}
       />
 
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {/* The Global Toaster - Handles all active toasts */}
+      <Toaster />
     </div>
   );
 }

@@ -50,7 +50,7 @@ export default function MediaPage({ matches, media, onUploadMedia }: MediaPagePr
 
   return (
     <div>
-      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 mb-6">
+      <div className="bg-white rounded-xl p-6 shadow-md drop-shadow-2xl border border-gray-200 mb-6">
         <h3 className="text-[#A91D3A] text-lg font-semibold mb-5">Upload Media</h3>
         <form onSubmit={handleSubmit}>
           <div className="mb-5">
@@ -90,7 +90,7 @@ export default function MediaPage({ matches, media, onUploadMedia }: MediaPagePr
       </div>
 
       {/* Gallery */}
-      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+      <div className="bg-white rounded-xl p-6 drop-shadow-2xl shadow-md border border-gray-200">
         <h3 className="text-[#A91D3A] text-lg font-semibold mb-5">Media Gallery</h3>
         {media.length === 0 ? (
           <p className="text-center text-gray-400 italic py-10">No media uploaded yet.</p>
