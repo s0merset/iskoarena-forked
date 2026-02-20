@@ -9,7 +9,12 @@ const spaceMono = Space_Mono({
   variable: "--font-mono",
 });
 
-export default function RootLayout({ children }) {
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" className={`${dmSans.variable} ${spaceMono.variable}`} suppressHydrationWarning>
       <body>
