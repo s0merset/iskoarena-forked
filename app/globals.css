@@ -17,6 +17,17 @@
 }
 .animate-slide-in { animation: slide-in 0.3s ease-out; }
 
+/* Magic UI Border Beam Animation */
+@keyframes border-beam {
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+.animate-border-beam {
+  animation: border-beam calc(var(--duration) * 1s) infinite linear;
+}
+
 /* Page fade-in */
 @keyframes fadeIn {
   from { opacity: 0; }
