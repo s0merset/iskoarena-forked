@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import type { Match, Result, Player, Team } from "@/types";
 import { 
   Trophy, 
   Zap, 
@@ -11,11 +10,16 @@ import {
   Clock,
   ChevronRight,
   ArrowRight,
-  TrendingUp,
-  Activity,
-  ShieldCheck
+  Activity
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription 
+} from "@/components/ui/card";
 import { 
   Table, 
   TableBody, 
@@ -25,9 +29,39 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+/**
+ * TypeScript Interfaces for IskoArena Data Models
+ */
+export interface Match {
+  id: string;
+  sport: string;
+  teamA: string;
+  teamB: string;
+  date: string; // ISO format: YYYY-MM-DD
+  time: string; // 24h format: HH:mm
+}
+
+export interface Result {
+  matchId: string;
+  scoreA: number;
+  scoreB: number;
+  winnerId: string;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  teamId: string;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  org: string;
+}
 
 interface DashboardPageProps {
   matches: Match[];
@@ -36,149 +70,118 @@ interface DashboardPageProps {
   teams: Team[];
 }
 
-export default function DashboardPage({ matches, results, players, teams }: DashboardPageProps) {
+/**
+ * IskoArena Dashboard
+ * Design: Vercel/Geist Minimalist
+ */
+export default function DashboardPage({ 
+  matches, 
+  results, 
+  players, 
+  teams 
+}: DashboardPageProps) {
   const now = new Date();
 
-  // Logic to determine ongoing matches
+  // Logic: Matches happening within a 2-hour window from their start time
   const ongoingMatches = matches.filter((match) => {
     const matchDateTime = new Date(`${match.date}T${match.time}`);
     const timeDiff = now.getTime() - matchDateTime.getTime();
     const hasResult = results.some((r) => r.matchId === match.id);
-    // Ongoing if started within last 2 hours and no result reported yet
     return timeDiff > 0 && timeDiff < 2 * 60 * 60 * 1000 && !hasResult;
   });
 
-  const recentMatches = [...matches].slice(-4).reverse();
+  const recentMatches = [...matches].slice(-5).reverse();
 
   const statCards = [
     { 
-      label: "TOTAL MATCHES", 
+      label: "Total Matches", 
       value: matches.length, 
       icon: Trophy, 
-      color: "from-orange-500/20 to-orange-500/5", 
-      iconColor: "text-orange-600",
-      accent: "bg-orange-500",
-      trend: "All seasons"
+      trend: "Across all sports" 
     },
     { 
-      label: "LIVE NOW", 
+      label: "Live Now", 
       value: ongoingMatches.length, 
       icon: Zap, 
-      color: "from-red-500/20 to-red-500/5", 
-      iconColor: "text-red-600",
-      accent: "bg-red-600",
-      isLive: true,
-      trend: "Ongoing matches"
+      isLive: true, 
+      trend: "Ongoing matches" 
     },
     { 
-      label: "TOTAL TEAMS", 
+      label: "Total Teams", 
       value: teams.length, 
       icon: Users, 
-      color: "from-blue-500/20 to-blue-500/5", 
-      iconColor: "text-blue-600",
-      accent: "bg-blue-600",
-      trend: "Active rosters"
+      trend: "Participating Orgs" 
     },
     { 
-      label: "TOTAL PLAYERS", 
+      label: "Total Players", 
       value: players.length, 
       icon: User, 
-      color: "from-emerald-500/20 to-emerald-500/5", 
-      iconColor: "text-emerald-600",
-      accent: "bg-emerald-600",
-      trend: "Verified Iskos"
+      trend: "Verified Iskolaros" 
     },
   ];
 
   return (
-    <div className="space-y-8 p-4 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto animate-in fade-in duration-700">
       
-
-      {/* Enhanced Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Vercel-Style Stat Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => (
-          <Card 
-            key={card.label} 
-            className="group drop-shadow-2xl relative overflow-hidden border-none bg-white transition-all duration-500 hover:-translate-y-2 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.08)] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)]"
-          >
-            {/* Top Accent Bar */}
-            <div className={cn("absolute top-0 left-0 right-0 h-1 z-10 opacity-30 group-hover:opacity-100 transition-opacity", card.accent)} />
-            
-            <CardContent className="p-0">
-              <div className="p-6 relative">
-                {/* Decorative Background Blob */}
-                <div className={cn(
-                  "absolute -right-4 -top-4 w-24 h-24 rounded-full blur-3xl opacity-0 group-hover:opacity-40 transition-opacity duration-700 bg-gradient-to-br", 
-                  card.color
-                )} />
-
-                <div className="flex justify-between items-start relative z-10">
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">
-                        {card.label}
-                      </p>
-                      <h3 className="text-4xl font-black text-slate-900 mt-1 tracking-tighter group-hover:scale-105 transition-transform origin-left duration-300">
-                        {card.value}
-                      </h3>
-                    </div>
-
-                    {/* Trend / Status Line */}
-                    <div className="flex items-center gap-1.5">
-                      <div className={cn("p-1 rounded-full", card.isLive ? "bg-red-100" : "bg-slate-100")}>
-                        {card.isLive ? (
-                          <Activity className="w-3 h-3 text-red-600 animate-pulse" />
-                        ) : (
-                          <TrendingUp className="w-3 h-3 text-slate-500" />
-                        )}
-                      </div>
-                      <span className="text-[11px] font-bold text-slate-500 italic">
-                        {card.trend}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Glass Style Icon Box */}
-                  <div className={cn(
-                    "relative p-4 rounded-2xl transition-all duration-500 group-hover:rotate-[10deg] shadow-sm",
-                    "bg-gradient-to-br border border-white/50",
-                    card.color
-                  )}>
-                    <card.icon className={cn("w-6 h-6 transition-transform group-hover:scale-110", card.iconColor)} />
-                    
-                    {/* Pulsing Live Indicator */}
-                    {card.isLive && (
-                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                      </span>
-                    )}
-                  </div>
+          <Card key={card.label} className="shadow-sm border-border bg-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    {card.label}
+                  </p>
+                  <p className="text-3xl font-bold tracking-tighter">
+                    {card.value}
+                  </p>
                 </div>
+                <div className={cn(
+                  "p-2.5 rounded-lg border border-border bg-muted/30 text-muted-foreground",
+                  card.isLive && "bg-red-50 border-red-100 text-red-600 shadow-[0_0_15px_rgba(220,38,38,0.1)]"
+                )}>
+                  <card.icon className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center text-[11px] font-medium text-muted-foreground">
+                {card.isLive ? (
+                  <>
+                    <span className="mr-2 flex h-2 w-2 rounded-full bg-red-600 animate-pulse" />
+                    <span className="text-red-600 uppercase">Live Updates Active</span>
+                  </>
+                ) : (
+                  <span className="flex items-center gap-1.5 opacity-70">
+                    <Activity className="w-3 h-3" /> {card.trend}
+                  </span>
+                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Recent Matches Table Card */}
-      <Card className="border-none drop-shadow-2xl bg-white overflow-hidden transition-all duration-500 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_50px_-12px_rgba(0,0,0,0.12)]">
-        <CardHeader className="flex flex-row items-center justify-between px-8 py-7 border-b border-slate-50">
-          <CardTitle className="text-xl font-black text-[#800000] tracking-tight">Recent Matches</CardTitle>
-          <Button variant="ghost" size="sm" className="text-xs text-[#800000] font-black hover:bg-red-50 group px-4">
-            View Schedule <ChevronRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
+      {/* Main Content Area: Recent Matches */}
+      <Card className="shadow-sm border-border">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6 border-b">
+          <div className="space-y-1">
+            <CardTitle className="text-xl font-semibold tracking-tight">Recent Matches</CardTitle>
+            <CardDescription className="text-sm">
+              The latest score updates and upcoming schedules from UP Cebu Intramurals.
+            </CardDescription>
+          </div>
+          <Button variant="outline" size="sm" className="h-9 px-4 font-medium transition-colors hover:bg-muted">
+            View Schedule <ChevronRight className="ml-1 w-4 h-4" />
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-slate-50/60">
-              <TableRow className="hover:bg-transparent border-none">
-                <TableHead className="px-8 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Sport</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Team A</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 text-center">vs</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Team B</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Date & Time</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 text-right pr-8">Status</TableHead>
+            <TableHeader>
+              <TableRow className="bg-muted/30 hover:bg-muted/30 border-b">
+                <TableHead className="h-11 font-medium text-muted-foreground pl-6">Sport</TableHead>
+                <TableHead className="h-11 font-medium text-muted-foreground">Matchup</TableHead>
+                <TableHead className="h-11 font-medium text-muted-foreground">Schedule</TableHead>
+                <TableHead className="h-11 text-right font-medium text-muted-foreground pr-6">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -187,34 +190,31 @@ export default function DashboardPage({ matches, results, players, teams }: Dash
                 const isLive = ongoingMatches.some((m) => m.id === match.id);
 
                 return (
-                  <TableRow key={match.id} className="group transition-colors border-slate-50 hover:bg-slate-50/50">
-                    <TableCell className="px-8 py-6 font-bold text-slate-900">{match.sport}</TableCell>
+                  <TableRow key={match.id} className="group cursor-default border-b last:border-0 hover:bg-muted/20">
+                    <TableCell className="pl-6 font-semibold text-foreground uppercase text-[12px] tracking-tight">
+                      {match.sport}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 shadow-inner flex items-center justify-center transition-transform group-hover:scale-110" />
-                        <span className="font-bold text-slate-700 text-sm">{match.teamA}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center italic text-slate-300 font-black group-hover:text-[#800000] transition-colors">VS</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 shadow-inner flex items-center justify-center transition-transform group-hover:scale-110" />
-                        <span className="font-bold text-slate-700 text-sm">{match.teamB}</span>
+                        <span className="font-medium">{match.teamA}</span>
+                        <span className="text-[10px] text-muted-foreground font-bold italic">VS</span>
+                        <span className="font-medium">{match.teamB}</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-black text-slate-800 tracking-tight">{match.date}</span>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{match.time}</span>
+                      <div className="flex flex-col py-1">
+                        <span className="text-sm font-medium">{match.date}</span>
+                        <span className="text-[11px] text-muted-foreground">{match.time}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right pr-8">
-                      <Badge className={cn(
-                        "border-none shadow-sm px-4 py-1 text-[9px] font-black uppercase tracking-widest transition-all duration-300 group-hover:scale-105",
-                        isLive ? "bg-blue-500 text-white" : 
-                        hasResult ? "bg-slate-800 text-white" : 
-                        "bg-orange-400 text-white"
-                      )}>
+                    <TableCell className="text-right pr-6">
+                      <Badge 
+                        variant={isLive ? "default" : hasResult ? "secondary" : "outline"} 
+                        className={cn(
+                          "rounded-full font-semibold text-[10px] uppercase tracking-widest px-3 py-0.5",
+                          isLive && "bg-red-600 hover:bg-red-700 text-white border-transparent"
+                        )}
+                      >
                         {isLive ? "Live" : hasResult ? "Finished" : "Upcoming"}
                       </Badge>
                     </TableCell>
@@ -223,33 +223,33 @@ export default function DashboardPage({ matches, results, players, teams }: Dash
               })}
             </TableBody>
           </Table>
-          <div className="p-4 text-center bg-slate-50/30 border-t border-slate-50">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest opacity-60">
-              Real-time update active • Data refreshed just now
-            </span>
-          </div>
         </CardContent>
       </Card>
 
-      {/* Briefing Banner Footer */}
-      <Card className="border-none drop-shadow-2xl bg-white overflow-hidden group shadow-[0_20px_50px_-12px_rgba(128,0,0,0.12)] hover:shadow-[0_30px_60px_-12px_rgba(128,0,0,0.18)] transition-all duration-500">
-        <CardContent className="p-5 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
-            <div className="bg-red-50 p-4 rounded-2xl shadow-inner transition-transform group-hover:scale-110 group-hover:-rotate-3">
-              <Calendar className="w-7 h-7 text-[#800000]" />
+      {/* Dark Banner: Next Event Call-to-Action */}
+      <Card className="shadow-lg border-none bg-zinc-950 text-white overflow-hidden relative group">
+        <div className="absolute inset-0 bg-gradient-to-r from-red-950/20 to-transparent pointer-events-none" />
+        <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+          <div className="flex items-center gap-6">
+            <div className="bg-zinc-800/80 p-4 rounded-xl border border-zinc-700 shadow-inner group-hover:bg-zinc-800 transition-colors">
+              <Calendar className="w-8 h-8 text-zinc-300" />
             </div>
-            <div>
-              <p className="font-black text-slate-900 text-lg tracking-tight">Next Tournament Briefing</p>
-              <p className="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-0.5">
-                <Clock className="w-3.5 h-3.5" /> Tomorrow at 10:00 AM • Conference Hall B
-              </p>
+            <div className="space-y-1">
+              <p className="font-semibold text-lg tracking-tight">Next Tournament Briefing</p>
+              <div className="flex items-center gap-4 text-sm text-zinc-400">
+                <span className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" /> Tomorrow, 10:00 AM
+                </span>
+                <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                <span>Conference Hall B</span>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <Button className="flex-1 sm:flex-none bg-[#800000] hover:bg-[#600000] text-white px-10 h-12 rounded-xl font-black text-sm transition-all duration-300 shadow-lg shadow-red-900/20 active:scale-95">
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <Button className="flex-1 md:flex-none bg-white text-black hover:bg-zinc-200 h-10 px-8 rounded-md font-semibold text-sm transition-all active:scale-95 shadow-xl shadow-white/5">
               Attend Briefing
             </Button>
-            <Button variant="outline" size="icon" className="rounded-xl h-12 w-12 border-slate-200 hover:bg-white hover:text-[#800000] hover:border-[#800000] transition-all shadow-sm">
+            <Button variant="ghost" size="icon" className="text-zinc-500 hover:text-white hover:bg-zinc-800 h-10 w-10 border border-zinc-800">
               <ArrowRight className="w-5 h-5" />
             </Button>
           </div>

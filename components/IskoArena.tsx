@@ -5,7 +5,7 @@ import { AuthManager, DataManager } from "@/lib/dataManager";
 import type { Admin, AppData, Match, Result, Player, Stat, MediaItem, Notification, PageName } from "@/types";
 
 // UI Components
-import LoginPage from "@/components/pages/LoginPage";
+import LandingPage from "@/components/pages/LandingPage"; 
 import DashboardPage from "@/components/pages/DashboardPage";
 import MatchesPage from "@/components/pages/MatchesPage";
 import ResultsPage from "@/components/pages/ResultsPage";
@@ -16,12 +16,13 @@ import NotificationsPage from "@/components/pages/NotificationsPage";
 import ArchivesPage from "@/components/pages/ArchivesPage";
 import Sidebar from "@/components/layout/Sidebar";
 import TopBar from "@/components/layout/TopBar";
-import Modal from "@/components/ui/Modal";
+//import Modal from "./ui/modal"
 
 // Shadcn UI Toast
 import { useToast } from "@/hooks/use-toast";
 import { Toast } from "radix-ui";
-import { Toaster } from "./ui/toaster";
+import { Toaster } from "sonner";
+
 
 export default function IskoArena() {
   const [currentAdmin, setCurrentAdmin] = useState<Admin | null>(null);
@@ -166,7 +167,7 @@ export default function IskoArena() {
   if (!currentAdmin) {
     return (
       <>
-        <LoginPage onLogin={handleLogin} />
+        <LandingPage onLogin={handleLogin} />
         <Toaster />
       </>
     );
@@ -213,13 +214,6 @@ export default function IskoArena() {
         </div>
       </main>
 
-      <Modal
-        isOpen={logoutModal}
-        title="Logout"
-        message="Are you sure you want to logout of IskoArena?"
-        onConfirm={() => { setLogoutModal(false); handleLogout(); }}
-        onCancel={() => setLogoutModal(false)}
-      />
 
       {/* The Global Toaster - Handles all active toasts */}
       <Toaster />

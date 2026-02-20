@@ -2,7 +2,6 @@
 import React, { useState, useMemo } from "react";
 import type { Stat, Player } from "@/types";
 import { SPORTS, COLLEGES, DataManager, csvEscape, exportCSV } from "@/lib/dataManager";
-import Modal from "@/components/ui/Modal";
 
 interface StatsPageProps {
   stats: Stat[];
@@ -242,13 +241,6 @@ export default function StatsPage({ stats, players, onAddStat, onUpdateStat, onD
         </div>
       </div>
 
-      <Modal
-        isOpen={deleteModal.open}
-        title="Delete Stat"
-        message="Are you sure you want to delete this stat?"
-        onConfirm={() => { if (deleteModal.id) onDeleteStat(deleteModal.id); setDeleteModal({ open: false, id: null }); }}
-        onCancel={() => setDeleteModal({ open: false, id: null })}
-      />
     </div>
   );
 }

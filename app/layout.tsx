@@ -1,22 +1,27 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { Nunito_Sans } from "next/font/google";
+import { DM_Sans, Space_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
+import './globals.css';
 
-const nunito = Nunito_Sans({
-  weight: ['400', '700'], // optional, all weights you use
-  subsets: ['latin'],      // must specify at least one
-  preload: true,
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-mono",
 });
 
-export const metadata: Metadata = {
-  title: "IskoArena - Admin Dashboard",
-  description: "UP Cebu Intramurals Tracker",
-};
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={nunito.variable}>
-      <body className="font-sans antialiased">{children}</body>
+    <html lang="en" className={`${dmSans.variable} ${spaceMono.variable}`} suppressHydrationWarning>
+      <body>
+	 <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          > 
+	{children}
+	  </ThemeProvider>
+      </body>
     </html>
   );
 }
