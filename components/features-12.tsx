@@ -28,14 +28,13 @@ export default function Features() {
             alt: 'Analytics dashboard',
         },
     }
-
-    return (
+return (
         <section className="py-12 md:py-20 lg:py-32">
             <div className="bg-linear-to-b absolute inset-0 -z-10 sm:inset-6 sm:rounded-b-3xl dark:block dark:to-[color-mix(in_oklab,var(--color-zinc-900)_75%,var(--color-background))]"></div>
             <div className="mx-auto max-w-5xl space-y-8 px-6 md:space-y-16 lg:space-y-20 dark:[--color-border:color-mix(in_oklab,var(--color-white)_10%,transparent)]">
                 <div className="relative z-10 mx-auto max-w-2xl space-y-6 text-center">
                     <h2 className="text-balance text-4xl font-semibold lg:text-6xl">Your Digital Gateway to the Arena</h2>
-		    <p>Stay updated with real-time scores, official schedules, and team standings. IskoArena brings the energy of the campus games directly to the Iskolaro community.</p>
+                    <p>Stay updated with real-time scores, official schedules, and team standings. IskoArena brings the energy of the campus games directly to the Iskolaro community.</p>
                 </div>
 
                 <div className="grid gap-12 sm:px-12 md:grid-cols-2 lg:gap-20 lg:px-0">
@@ -48,7 +47,7 @@ export default function Features() {
                             <AccordionTrigger>
                                 <div className="flex items-center gap-2 text-base">
                                     <Database className="size-4" />
-				    Real-Time Score Tracking
+                                    Real-Time Score Tracking
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent>Eliminate the delay of social media updates. Get instant point-by-point updates from every court on campus.</AccordionContent>
@@ -57,28 +56,28 @@ export default function Features() {
                             <AccordionTrigger>
                                 <div className="flex items-center gap-2 text-base">
                                     <Fingerprint className="size-4" />
-				    Centralized Match Schedules
+                                    Centralized Match Schedules
                                 </div>
                             </AccordionTrigger>
-			    <AccordionContent>Never miss a game. Access the complete, official schedule of the Iskolaro Committee and the PE Department in one place.</AccordionContent>
+                            <AccordionContent>Never miss a game. Access the complete, official schedule of the Iskolaro Committee and the PE Department in one place.</AccordionContent>
                         </AccordionItem>
                         <AccordionItem value="item-3">
                             <AccordionTrigger>
                                 <div className="flex items-center gap-2 text-base">
                                     <IdCard className="size-4" />
-				    Dynamic Team Standings
+                                    Dynamic Team Standings
                                 </div>
                             </AccordionTrigger>
-			    <AccordionContent>Track your organization's progress with automated leaderboards and win-loss records updated after every match.</AccordionContent>
+                            <AccordionContent>Track your organization's progress with automated leaderboards and win-loss records updated after every match.</AccordionContent>
                         </AccordionItem>
                         <AccordionItem value="item-4">
                             <AccordionTrigger>
                                 <div className="flex items-center gap-2 text-base">
                                     <ChartBarIncreasingIcon className="size-4" />
-				    Player Rosters & Stats
+                                    Player Rosters & Stats
                                 </div>
                             </AccordionTrigger>
-			    <AccordionContent>Highlighting student-athletes. View player profiles, MVP highlights, and historical data from past intramurals.</AccordionContent>
+                            <AccordionContent>Highlighting student-athletes. View player profiles, MVP highlights, and historical data from past intramurals.</AccordionContent>
                         </AccordionItem>
                     </Accordion>
 
@@ -103,9 +102,16 @@ export default function Features() {
                                 </motion.div>
                             </AnimatePresence>
                         </div>
-      <BorderBeam duration={8} size={100} />
-      </div>
+
+			<BorderBeam
+                            duration={6}
+                            size={200}
+                            colorFrom="transparent"
+                            colorTo="#b45309"
+                        />
+                    </div>
                 </div>
+
             </div>
         </section>
     )
