@@ -2,7 +2,6 @@
 import React, { useState, useMemo, useRef, useCallback } from "react";
 import type { Player } from "@/types";
 import { SPORTS, COLLEGES, POSITIONS_BY_SPORT, resizeImageFile, exportCSV, csvEscape } from "@/lib/dataManager";
-import Modal from "@/components/ui/Modal";
 
 interface TeamsPageProps {
   players: Player[];
@@ -290,17 +289,6 @@ export default function TeamsPage({ players, onAddPlayer, onDeletePlayer, onDele
         )}
       </div>
 
-      <Modal
-        isOpen={deleteModal.open}
-        title={deleteModal.all ? "Remove All Players" : "Delete Player"}
-        message={deleteModal.all ? "Are you sure you want to remove ALL players? This cannot be undone." : "Are you sure you want to delete this player?"}
-        onConfirm={() => {
-          if (deleteModal.all) onDeleteAllPlayers();
-          else if (deleteModal.id) onDeletePlayer(deleteModal.id);
-          setDeleteModal({ open: false, id: null, all: false });
-        }}
-        onCancel={() => setDeleteModal({ open: false, id: null, all: false })}
-      />
     </div>
   );
 }

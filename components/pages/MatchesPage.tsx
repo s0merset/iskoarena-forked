@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import type { Match } from "@/types";
 import { SPORTS, TEAMS } from "@/lib/dataManager";
-import Modal from "@/components/ui/Modal";
 
 interface MatchesPageProps {
   matches: Match[];
@@ -124,13 +123,6 @@ export default function MatchesPage({ matches, onAddMatch, onDeleteMatch }: Matc
         </div>
       </div>
 
-      <Modal
-        isOpen={modal.open}
-        title="Delete Match"
-        message="Are you sure you want to delete this match? This action cannot be undone."
-        onConfirm={() => { if (modal.id) onDeleteMatch(modal.id); setModal({ open: false, id: null }); }}
-        onCancel={() => setModal({ open: false, id: null })}
-      />
     </div>
   );
 }
