@@ -145,24 +145,18 @@ export default function HeroSection({ onLoginClick, onSignupClick }: HeroSection
                                 },
                                 ...transitionVariants,
                             }}>
-                            <div className="mask-b-from-55% relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
-                                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
-                                    <Image
-                                        className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block"
-                                        src="/app_screenshot.png"
-                                        alt="app screen"
-                                        width="2700"
-                                        height="1440"
-                                    />
-                                    <Image
-                                        className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden"
-                                        src="/mail2-light.png"
-                                        alt="app screen"
-                                        width="2700"
-                                        height="1440"
-                                    />
-                                </div>
-                            </div>
+			    {/* Container: Moved the mask here for the 'Transition' effect */}
+			    <div className="relative mt-8 px-4 sm:mt-12 md:mt-20 z-20">
+    <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background/20 relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-white/10 p-2 shadow-2xl ring-1">
+        <Image
+            className="aspect-15/8 relative rounded-xl [mask-image:linear-gradient(to_bottom,black_20%,transparent_90%))]"
+            src="/app_screenshot.png"
+            alt="IskoArena Dashboard"
+            width="2700"
+            height="1440"
+        />
+    </div>
+</div>
                         </AnimatedGroup>
                     </div>
                 </section>

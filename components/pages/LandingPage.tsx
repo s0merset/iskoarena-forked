@@ -26,9 +26,6 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
-  /**
-   * Logic passed to the LoginPage Modal
-   */
   const handleLoginSubmit = (username: string, password: string) => {
     const admin = AuthManager.verifyLogin(username, password);
     if (admin) {
@@ -39,13 +36,9 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
     return { success: false, message: "Invalid username or password." };
   };
 
-  /**
-   * Logic passed to the SignupPage Modal
-   */
   const handleSignupSubmit = (fullName: string, username: string, password: string) => {
     const result = AuthManager.registerAdmin(fullName, username, password);
     if (result.success) {
-      // Small delay before switching to login so user can see success message
       setTimeout(() => {
         setIsSignupOpen(false);
         setIsLoginOpen(true);
@@ -55,8 +48,8 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950">
-      {/* Hero Section triggers the modals */}
+    <div className="relative min-h-screen bg-neutral-950">
+      {/* 1. Sections */}
       <HeroSection
         onLoginClick={() => setIsLoginOpen(true)}
         onSignupClick={() => setIsSignupOpen(true)}
@@ -69,7 +62,18 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
       <CallToAction />
       <FooterSection />
 
-      {/* Tailark Login Modal */}
+      {/* 2. GLOBAL VIEWPORT BLUR (Added here) */}
+      {/* 
+          - fixed bottom-0: Sticks to the bottom of the browser window
+          - pointer-events-none: Critical so you can still click buttons behind the blur
+          - z-[50]: Sits above the sections but below the modals
+      */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 h-28 pointer-events-none z-[50] backdrop-blur-sm [mask-image:linear-gradient(to_top,black_20%,transparent)]"
+        aria-hidden="true"
+      />
+
+      {/* 3. Modals (High Z-Index) */}
       <LoginPage
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
@@ -80,7 +84,6 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         }}
       />
 
-      {/* Tailark Signup Modal */}
       <SignupPage
         isOpen={isSignupOpen}
         onClose={() => setIsSignupOpen(false)}
