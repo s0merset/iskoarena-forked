@@ -15,22 +15,24 @@ export default function FAQsThree() {
     const faqItems: FAQItem[] = [
         {
             id: 'item-1',
-            icon: 'clock',
-            question: 'What are your business hours?',
-            answer: 'Our customer service team is available Monday through Friday from 9:00 AM to 8:00 PM EST, and weekends from 10:00 AM to 6:00 PM EST. During holidays, hours may vary and will be posted on our website.',
-        },
+            icon: 'calendar',
+            question: 'What is IskoArena and who can use it?',
+            answer: 'IskoArena is the centralized platform for UP Cebu Intramurals. It is designed for students, faculty, staff, and alumni to track live game updates, view official schedules, and browse player statistics in one place.'       
+	},
+
         {
             id: 'item-2',
-            icon: 'credit-card',
-            question: 'How do subscription payments work?',
-            answer: 'Subscription payments are automatically charged to your default payment method on the same day each month or year, depending on your billing cycle. You can update your payment information and view billing history in your account dashboard.',
-        },
+            icon: 'trophy',
+            question: 'How do I see the latest game results and standings?',
+            answer: 'You can view real-time scores on the "Live Updates" tab. For overall rankings, head to the "Standings" section, which is updated immediately after game officials verify the score sheets.'
+	},
         {
             id: 'item-3',
-            icon: 'truck',
-            question: 'Can I expedite my shipping?',
-            answer: 'Yes, we offer several expedited shipping options at checkout. Next-day and 2-day shipping are available for most U.S. addresses if orders are placed before 2:00 PM EST. International expedited shipping options vary by destination.',
-        },
+            icon: 'zap',
+            question: "Where can I find the official schedule for upcoming matches?",
+            answer: 'The "Schedules" tab provides a comprehensive calendar of all sporting events. You can filter by sport (e.g., Basketball, Volleyball, E-sports) or by date to make sure you never miss a game.'
+	           
+	},
         {
             id: 'item-4',
             icon: 'globe',

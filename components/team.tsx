@@ -2,39 +2,33 @@ import Link from 'next/link'
 
 const members = [
     {
-        name: 'Liam Brown',
-        role: 'Founder - CEO',
-        avatar: 'https://alt.tailus.io/images/team/member-one.webp',
+        name: 'Andre Milan Aranas',
+        role: 'Developer',
+        avatar: '/andre.jpg',
         link: '#',
     },
     {
-        name: 'Elijah Jones',
-        role: 'Co-Founder - CTO',
-        avatar: 'https://alt.tailus.io/images/team/member-two.webp',
+        name: 'Rex Russel Escarro',
+        role: 'Developer',
+        avatar: '/rex.jpg',
         link: '#',
     },
     {
-        name: 'Isabella Garcia',
-        role: 'Sales Manager',
-        avatar: 'https://alt.tailus.io/images/team/member-three.webp',
+        name: 'Jonel Dinopol',
+        role: 'Developer',
+        avatar: '/jonel.jpg',
         link: '#',
     },
     {
-        name: 'Henry Lee',
-        role: 'UX Engeneer',
-        avatar: 'https://alt.tailus.io/images/team/member-four.webp',
+        name: 'Dominique Himaya',
+        role: 'UI/UX Designer',
+        avatar: '/dom.jpg',
         link: '#',
     },
     {
-        name: 'Ava Williams',
-        role: 'Interaction Designer',
-        avatar: 'https://alt.tailus.io/images/team/member-five.webp',
-        link: '#',
-    },
-    {
-        name: 'Olivia Miller',
-        role: 'Visual Designer',
-        avatar: 'https://alt.tailus.io/images/team/member-six.webp',
+        name: 'Francis Rey Betonio',
+        role: 'UI/UX Designer',
+        avatar: '/ako.jpg',
         link: '#',
     },
 ]
@@ -46,10 +40,10 @@ export default function TeamSection() {
                 <span className="text-caption -ml-6 -mt-3.5 block w-max bg-gray-50 px-6 dark:bg-gray-950">Team</span>
                 <div className="mt-12 gap-4 sm:grid sm:grid-cols-2 md:mt-24">
                     <div className="sm:w-2/5">
-                        <h2 className="text-3xl font-bold sm:text-4xl">Our dream team</h2>
+                        <h2 className="text-3xl font-bold sm:text-4xl">The Dream Team</h2>
                     </div>
                     <div className="mt-6 sm:mt-0">
-                        <p>During the working process, we perform regular fitting with the client because he is the only person who can feel whether a new suit fits or not.</p>
+			<p>We are a team of student-developers dedicated to elevating the UP Cebu Iskolaro  experience. We aim to bridge the gap between athletes and the community, ensuring every game and milestone is celebrated across the campus.</p>
                     </div>
                 </div>
                 <div className="mt-12 md:mt-24">
