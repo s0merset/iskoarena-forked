@@ -64,11 +64,36 @@ export default function IskoArena() {
     refresh();
     toast({ title: "Success", description: "Match added.", variant: "success" });
   };
-  const handleDeleteMatch = (id: number) => {
-    DataManager.delete("matches", id);
-    refresh();
-    toast({ title: "Deleted", description: "Match removed.", variant: "destructive" });
-  };
+
+    // Example: MatchesPage handler
+const handleDeleteMatch = (id: number) => {
+  // coerce number to string for DataManager
+  DataManager.delete("matches", String(id));
+  refresh();
+};
+
+// StatsPage handlers
+const handleAddStat = (stat: any) => {
+  DataManager.add("stats", stat);
+  refresh();
+};
+
+const handleUpdateStat = (id: string, stat: any) => {
+  DataManager.update("stats", String(id), stat); // coerce number → string
+  refresh();
+};
+
+const handleDeleteStat = (id: string) => {
+  DataManager.delete("stats", String(id)); // coerce number → string
+  refresh();
+};
+
+
+// TeamsPage handler
+const handleDeletePlayer = (id: number) => {
+  DataManager.delete("players", String(id));
+  refresh();
+};
 
   // ... (Other handlers remain the same as your original file)
 
@@ -96,11 +121,24 @@ export default function IskoArena() {
           refresh();
         }} />;
       case "stats":
-        return <StatsPage stats={data.stats} players={data.players} onAddStat={(s) => { DataManager.add("stats", s); refresh(); }} onUpdateStat={(id, s) => { DataManager.update("stats", id, s); refresh(); }} onDeleteStat={(id) => { DataManager.delete("stats", id); refresh(); }} onLoadDemoStats={() => { /* demo logic */ refresh(); }} />;
+	    <StatsPage
+      stats={data.stats}
+      players={data.players}
+      onAddStat={handleAddStat}
+      onUpdateStat={handleUpdateStat}
+      onDeleteStat={handleDeleteStat}
+      onLoadDemoStats={() => { refresh(); }}
+    />
       case "media":
         return <MediaPage matches={data.matches} media={data.media} onUploadMedia={(m) => { DataManager.add("media", m); refresh(); }} />;
       case "teams":
-        return <TeamsPage players={data.players} onAddPlayer={(p) => { DataManager.add("players", p); refresh(); }} onDeletePlayer={(id) => { DataManager.delete("players", id); refresh(); }} onDeleteAllPlayers={() => { data.players = []; DataManager.saveData(data); refresh(); }} onImportPlayers={(ps) => { ps.forEach(p => DataManager.add("players", p)); refresh(); }} />;
+	    <TeamsPage
+  players={data.players}
+  onAddPlayer={(p) => { DataManager.add("players", p); refresh(); }}
+  onDeletePlayer={handleDeletePlayer}   // numeric ID in, string for DataManager
+  onDeleteAllPlayers={() => { data.players = []; DataManager.saveData(data); refresh(); }}
+  onImportPlayers={(ps) => { ps.forEach(p => DataManager.add("players", p)); refresh(); }}
+/>
       case "notifications":
         return <NotificationsPage notifications={data.notifications} onSend={(n) => { DataManager.add("notifications", n); refresh(); }} />;
       case "archives":

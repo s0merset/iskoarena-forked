@@ -7,8 +7,8 @@ interface StatsPageProps {
   stats: Stat[];
   players: Player[];
   onAddStat: (stat: Omit<Stat, "id" | "createdAt">) => void;
-  onUpdateStat: (id: number, stat: Partial<Stat>) => void;
-  onDeleteStat: (id: number) => void;
+  onUpdateStat: (id: string, stat: Partial<Stat>) => void;
+  onDeleteStat: (id: string) => void;
   onLoadDemoStats: () => void;
 }
 
@@ -22,8 +22,8 @@ const emptyForm = { type: "" as "Player" | "Team" | "", sport: "", college: "", 
 
 export default function StatsPage({ stats, players, onAddStat, onUpdateStat, onDeleteStat, onLoadDemoStats }: StatsPageProps) {
   const [form, setForm] = useState({ ...emptyForm });
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
   const [search, setSearch] = useState("");
   const [filterCollege, setFilterCollege] = useState("");
   const [filterSport, setFilterSport] = useState("");
@@ -42,7 +42,7 @@ export default function StatsPage({ stats, players, onAddStat, onUpdateStat, onD
     const q = search.toLowerCase();
     return stats
       .filter((s) => {
-        const player = s.playerId ? players.find((p) => p.id === s.playerId) : null;
+		const player = s.playerId != null ? players.find((p) => p.id === String(s.playerId)) : null;
         return (
           (!q || s.statName.toLowerCase().includes(q) || (player?.name.toLowerCase().includes(q) ?? false) || s.college.toLowerCase().includes(q)) &&
           (!filterCollege || s.college === filterCollege) &&
@@ -216,7 +216,9 @@ export default function StatsPage({ stats, players, onAddStat, onUpdateStat, onD
                 <tr><td colSpan={8} className="text-center text-gray-400 italic py-10">No stats match the filters.</td></tr>
               ) : (
                 filteredStats.map((s) => {
-                  const player = s.playerId ? players.find((p) => p.id === s.playerId) : null;
+					const player = s.playerId != null
+  ? players.find((p) => String(p.id) === String(s.playerId))
+  : null;
                   return (
                     <tr key={s.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                       <td className="px-3 py-3 text-sm">{s.type}</td>

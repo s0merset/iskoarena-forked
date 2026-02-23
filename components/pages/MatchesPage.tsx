@@ -13,7 +13,7 @@ const emptyForm = { sport: "", teamA: "", teamB: "", date: "", time: "", venue: 
 
 export default function MatchesPage({ matches, onAddMatch, onDeleteMatch }: MatchesPageProps) {
   const [form, setForm] = useState(emptyForm);
-  const [modal, setModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
+  const [modal, setModal] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

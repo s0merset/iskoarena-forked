@@ -5,7 +5,7 @@ import type { Match, Result } from "@/types";
 interface ResultsPageProps {
   matches: Match[];
   results: Result[];
-  onRecordResult: (matchId: number, teamA: string, teamB: string, scoreA: number, scoreB: number, sport: string) => void;
+  onRecordResult: (matchId: string, teamA: string, teamB: string, scoreA: number, scoreB: number, sport: string) => void;
 }
 
 export default function ResultsPage({ matches, results, onRecordResult }: ResultsPageProps) {
@@ -19,11 +19,18 @@ export default function ResultsPage({ matches, results, onRecordResult }: Result
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedMatch) { alert("Please select a match"); return; }
+
     const [matchId, teamA, teamB] = selectedMatch.split("|");
-    const a = parseInt(scoreA), b = parseInt(scoreB);
+    const a = parseInt(scoreA);
+    const b = parseInt(scoreB);
     if (isNaN(a) || isNaN(b)) { alert("Please enter valid scores"); return; }
-    const match = matches.find((m) => m.id === parseInt(matchId));
-    onRecordResult(parseInt(matchId), teamA, teamB, a, b, match?.sport || "");
+
+    const match = matches.find((m) => m.id === matchId);
+    if (!match) { alert("Match not found"); return; }
+
+    onRecordResult(matchId, teamA, teamB, a, b, match.sport);
+
+    // clear the form
     setSelectedMatch("");
     setScoreA("");
     setScoreB("");

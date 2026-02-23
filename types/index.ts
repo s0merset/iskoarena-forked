@@ -7,7 +7,7 @@ export interface Admin {
 }
 
 export interface Match {
-  id: number;
+  id: string;
   sport: string;
   teamA: string;
   teamB: string;
@@ -20,7 +20,8 @@ export interface Match {
 
 export interface Result {
   id: number;
-  matchId: number;
+  winnerId: string;
+  matchId: string;
   teamA: string;
   teamB: string;
   scoreA: number;
@@ -31,8 +32,9 @@ export interface Result {
 }
 
 export interface Player {
-  id: number;
+  id: string;
   name: string;
+  teamId: string;
   college: string;
   sport: string;
   position: string;
@@ -42,14 +44,15 @@ export interface Player {
 }
 
 export interface Team {
-  id: number;
+  id: string;
+  org: string;
   name: string;
   primarySport: string;
   createdAt: string;
 }
 
 export interface Stat {
-  id: number;
+  id: string;
   type: "Player" | "Team";
   sport: string;
   college: string;

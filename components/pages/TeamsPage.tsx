@@ -11,7 +11,7 @@ interface TeamsPageProps {
   onImportPlayers: (players: Omit<Player, "id" | "createdAt">[]) => void;
 }
 
-const emptyForm = { name: "", college: "", sport: "", position: "", jersey: "", photoDataUrl: "" };
+const emptyForm = { name: "", teamId: "", college: "", sport: "", position: "", jersey: "", photoDataUrl: "" };
 
 export default function TeamsPage({ players, onAddPlayer, onDeletePlayer, onDeleteAllPlayers, onImportPlayers }: TeamsPageProps) {
   const [form, setForm] = useState({ ...emptyForm });
@@ -24,7 +24,7 @@ export default function TeamsPage({ players, onAddPlayer, onDeletePlayer, onDele
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
-  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null; all: boolean }>({ open: false, id: null, all: false });
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: string | null; all: boolean }>({ open: false, id: null, all: false });
   const [dragging, setDragging] = useState(false);
   const photoRef = useRef<HTMLInputElement>(null);
   const importRef = useRef<HTMLInputElement>(null);
@@ -84,31 +84,50 @@ export default function TeamsPage({ players, onAddPlayer, onDeletePlayer, onDele
     if (isNaN(jerseyNum) || jerseyNum < 0) { setFormError("Enter a valid jersey number."); return; }
     const dup = players.find((p) => p.college === form.college && p.sport === form.sport && p.jersey === jerseyNum);
     if (dup) { setFormError(`Jersey ${jerseyNum} is already taken by ${dup.name} (${dup.college} - ${dup.sport}).`); return; }
-    onAddPlayer({ name: form.name, college: form.college, sport: form.sport, position: form.position, jersey: jerseyNum, photo: form.photoDataUrl || null });
+    onAddPlayer({ name: form.name, teamId: form.teamId, college: form.college, sport: form.sport, position: form.position, jersey: jerseyNum, photo: form.photoDataUrl || null });
     setForm({ ...emptyForm });
     setPhotoPreview(null);
     if (photoRef.current) photoRef.current.value = "";
   };
 
-  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target!.result as string;
-      const rows = text.split(/\r?\n/).filter(Boolean);
-      const headers = rows.shift()!.split(",");
-      const imported = rows.map((r) => {
+    const handleImport = (e: React.ChangeEvent<HTMLInputElement>, defaultTeamId: string = '0') => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const text = ev.target!.result as string;
+    const rows = text.split(/\r?\n/).filter(Boolean);
+    const headers = rows.shift()!.split(",");
+
+    const imported = rows
+      .map((r) => {
         const cols = r.split(",");
         const obj: Record<string, string> = {};
-        headers.forEach((h, i) => { obj[h.trim()] = cols[i]?.replace(/^"|"$/g, "") || ""; });
-        return { name: obj.name || "", college: obj.college || "", sport: obj.sport || "", position: obj.position || "", jersey: parseInt(obj.jersey) || 0, photo: null };
-      }).filter((p) => p.name);
-      onImportPlayers(imported);
-    };
-    reader.readAsText(file);
-    if (importRef.current) importRef.current.value = "";
+        headers.forEach((h, i) => {
+          obj[h.trim()] = cols[i]?.replace(/^"|"$/g, "") || "";
+        });
+
+        // return object matching Omit<Player, "id" | "createdAt">
+        return {
+          teamId: defaultTeamId,                // required field
+          name: obj.name || "",
+          college: obj.college || "",
+          sport: obj.sport || "",
+          position: obj.position || "",
+          jersey: parseInt(obj.jersey) || 0,    // safe numeric conversion
+          photo: obj.photo || null,
+        };
+      })
+      .filter((p) => p.name); // skip empty names
+
+    onImportPlayers(imported);
   };
+
+  reader.readAsText(file);
+
+  if (importRef.current) importRef.current.value = "";
+};
 
   const handleExport = () => {
     const headers = ["id","name","college","sport","position","jersey","createdAt"];

@@ -72,7 +72,7 @@ const DEFAULT_DATA: AppData = {
 
 const MOCK_MATCHES: Match[] = [
   {
-    id: 1,
+    id: String(1),
     sport: "Basketball Men",
     teamA: "COS Scions",
     teamB: "SOM Tycoons",
@@ -83,7 +83,7 @@ const MOCK_MATCHES: Match[] = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: 2,
+    id: String(2),
     sport: "Volleyball Women",
     teamA: "CSS Stallions",
     teamB: "CCAD Phoenix",
@@ -96,17 +96,17 @@ const MOCK_MATCHES: Match[] = [
 ];
 
 const MOCK_TEAMS: Team[] = [
-  { id: 1, name: "COS Scions", primarySport: "Basketball Men", createdAt: new Date().toISOString() },
-  { id: 2, name: "SOM Tycoons", primarySport: "Basketball Men", createdAt: new Date().toISOString() },
-  { id: 3, name: "CSS Stallions", primarySport: "Volleyball Women", createdAt: new Date().toISOString() },
-  { id: 4, name: "CCAD Phoenix", primarySport: "Volleyball Women", createdAt: new Date().toISOString() },
+  { id: String(1), name: "COS Scions", org: "COS", primarySport: "Basketball Men", createdAt: new Date().toISOString() },
+  { id: String(2), name: "SOM Tycoons", org: "COS", primarySport: "Basketball Men", createdAt: new Date().toISOString() },
+  { id: String(3), name: "CSS Stallions", org: "COS", primarySport: "Volleyball Women", createdAt: new Date().toISOString() },
+  { id: String(4), name: "CCAD Phoenix", org: "COS",primarySport: "Volleyball Women", createdAt: new Date().toISOString() },
 ];
 
 const MOCK_PLAYERS: Player[] = [
-  { id: 1, name: "Juan Santos", college: "COS Scions", sport: "Basketball Men", position: "Point Guard", jersey: 7, createdAt: new Date().toISOString() },
-  { id: 2, name: "Maria Garcia", college: "COS Scions", sport: "Basketball Men", position: "Small Forward", jersey: 10, createdAt: new Date().toISOString() },
-  { id: 3, name: "Carlos Reyes", college: "SOM Tycoons", sport: "Basketball Men", position: "Center", jersey: 5, createdAt: new Date().toISOString() },
-  { id: 4, name: "Ana Cruz", college: "CSS Stallions", sport: "Volleyball Women", position: "Setter", jersey: 3, createdAt: new Date().toISOString() },
+  { id: String(1), teamId: String(1), name: "Juan Santos", college: "COS Scions", sport: "Basketball Men", position: "Point Guard", jersey: 7, createdAt: new Date().toISOString() },
+  { id: String(2), teamId: String(2), name: "Maria Garcia", college: "COS Scions", sport: "Basketball Men", position: "Small Forward", jersey: 10, createdAt: new Date().toISOString() },
+  { id: String(3), teamId: String(3), name: "Carlos Reyes", college: "SOM Tycoons", sport: "Basketball Men", position: "Center", jersey: 5, createdAt: new Date().toISOString() },
+  { id: String(4), teamId: String(4), name: "Ana Cruz", college: "CSS Stallions", sport: "Volleyball Women", position: "Setter", jersey: 3, createdAt: new Date().toISOString() },
 ];
 
 export const DataManager = {
@@ -152,27 +152,27 @@ export const DataManager = {
     return newItem;
   },
 
-  delete<K extends keyof AppData>(type: K, id: number): void {
-    const data = this.getData();
-    const arr = data[type] as AppData[K] & { id: number }[];
-    const filtered = arr.filter((item) => item.id !== id);
+delete<K extends keyof AppData>(type: K, id: string): void {
+  const data = this.getData();
 
-    data[type] = filtered as AppData[K];
+  // stored IDs are numbers, convert to string for comparison
+  const arr = data[type] as AppData[K] & { id: number }[];
+  const filtered = arr.filter((item) => String(item.id) !== id);
 
-    this.saveData(data);
-  },
-
+  data[type] = filtered as AppData[K];
+  this.saveData(data);
+},
+  
     update<K extends keyof AppData>(
   type: K,
-  id: number,
+  id: string,
   updatedItem: Partial<AppData[K][number]>
 ): void {
   const data = this.getData();
-
   const arr = data[type] as AppData[K];
-  const index = (arr as { id: number }[]).findIndex(
-    (item) => item.id === id
-  );
+
+  // coerce numeric IDs to string for comparison
+  const index = (arr as { id: number }[]).findIndex((item) => String(item.id) === id);
 
   if (index !== -1) {
     (arr as any)[index] = {
@@ -181,8 +181,7 @@ export const DataManager = {
     };
     this.saveData(data);
   }
-},
-
+}
 
 };
 
