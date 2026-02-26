@@ -10,8 +10,8 @@ import { ThemeToggleButton } from './ui/ThemeToggleButton'
 const menuItems = [
     { name: 'Features', href: '#features' },
     { name: 'Solution', href: '#solution' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'About', href: '#about' },
+    { name: 'FAQ', href: '#pricing' },
+    { name: 'Team', href: '#about' },
 ]
 
 interface HeroHeaderProps {
@@ -127,7 +127,6 @@ export const HeroHeader = ({ onLoginClick, onSignupClick }: HeroHeaderProps) => 
                                     <span>Get Started</span>
                                 </Button>
 
-                                <ThemeToggleButton />
                             </div>
                         </div>
                     </div>

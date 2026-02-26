@@ -1,3 +1,5 @@
+@import url(https://db.onlinewebfonts.com/c/fb243b62cb1ea9f8e36964305d7e1fc3?family=Maroons+Strong);
+
 @import "tailwindcss-animate";
 
 @tailwind base;
@@ -72,6 +74,7 @@
   --font-sans: Geist, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Geist Mono, monospace;
+  --font-heading: "Maroons Strong", sans-serif;
   --radius: 0.5rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
@@ -128,6 +131,7 @@
   --font-sans: Geist, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Geist Mono, monospace;
+  --font-heading: "Maroons Strong", sans-serif;
   --radius: 0.5rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
@@ -154,5 +158,10 @@
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
   }
-  .theme { --font-sans: Geist, sans-serif; --font-mono: Geist Mono, monospace; --font-serif: Georgia, serif; --radius: 0.5rem; --tracking-tighter: calc(var(--tracking-normal) - 0.05em); --tracking-tight: calc(var(--tracking-normal) - 0.025em); --tracking-wide: calc(var(--tracking-normal) + 0.025em); --tracking-wider: calc(var(--tracking-normal) + 0.05em); --tracking-widest: calc(var(--tracking-normal) + 0.1em); }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Maroons Strong", sans-serif;
+  }
+
+  .theme { --font-sans: Geist, sans-serif; --font-mono: Geist Mono, monospace; --font-serif: Georgia, serif; --font-heading: "Maroons Strong", sans-serif; --radius: 0.5rem; --tracking-tighter: calc(var(--tracking-normal) - 0.05em); --tracking-tight: calc(var(--tracking-normal) - 0.025em); --tracking-wide: calc(var(--tracking-normal) + 0.025em); --tracking-wider: calc(var(--tracking-normal) + 0.05em); --tracking-widest: calc(var(--tracking-normal) + 0.1em); }
 }

@@ -11,7 +11,7 @@ export const Logo = ({ className }: { className?: string }) => {
                 height={50}
                 className="object-contain"
             />
-            <span className="text-xl font-[500] tracking-tight">IskoArena</span>
+            <span className="text-2xl font-maroons tracking-tight">IskoArena</span>
         </div>
     )
 }

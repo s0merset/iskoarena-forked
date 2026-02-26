@@ -86,7 +86,9 @@ const config: Config = {
     			],
     			mono: [
     				'var(--font-mono)'
-    			]
+    			],
+			maroons: ['var(--font-heading)'],
+			
     		}
     	}
     },
