@@ -11,7 +11,8 @@ import CallToAction from "@/components/call-to-action";
 import FooterSection from "@/components/footer";
 import LoginPage from "@/components/login";
 import SignupPage from "@/components/sign-up";
-import FadeInSection from "@/components/fade-in-section"; // 👈 import
+import NewsCarousel from "@/components/news-carousel";
+import FadeInSection from "@/components/fade-in-section"; 
 
 interface LandingPageProps {
   onLogin: (admin: Admin) => void;
@@ -49,7 +50,11 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         onLoginClick={() => setIsLoginOpen(true)}
         onSignupClick={() => setIsSignupOpen(true)}
       />
-
+	
+      <FadeInSection>
+	<NewsCarousel />	
+      </FadeInSection>
+      
       <FadeInSection>
         <Features />
       </FadeInSection>
